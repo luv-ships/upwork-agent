@@ -1,0 +1,33 @@
+{
+  "name": "upwork-agent",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.16.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "pnpm --filter @upwork-agent/core build && pnpm --filter @upwork-agent/db build && pnpm --filter @upwork-agent/worker build && pnpm --filter @upwork-agent/web build",
+    "dev": "pnpm --parallel --filter @upwork-agent/web --filter @upwork-agent/worker dev",
+    "dev:web": "pnpm --filter @upwork-agent/web dev",
+    "dev:worker": "pnpm --filter @upwork-agent/worker dev",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "release:check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "preflight:production": "node --env-file-if-exists=.env scripts/production-preflight.mjs",
+    "test:unit": "pnpm --filter @upwork-agent/core test",
+    "test:e2e": "node --env-file-if-exists=.env node_modules/@playwright/test/cli.js test",
+    "db:generate": "pnpm --filter @upwork-agent/db db:generate",
+    "db:push": "supabase db push",
+    "db:migrate": "supabase db reset",
+    "services:up": "docker compose up -d redis",
+    "services:down": "docker compose down"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  }
+}

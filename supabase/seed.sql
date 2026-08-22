@@ -1,0 +1,3 @@
+-- Intentionally empty.
+-- Local tests create tenant-owned records through authenticated application
+-- commands so ownership and idempotency paths are exercised.
