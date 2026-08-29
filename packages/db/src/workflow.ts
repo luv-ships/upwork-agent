@@ -179,7 +179,7 @@ export async function claimWorkflowTask(
       select id
       from ${workflowTasks}
       where status in ('queued', 'retry_wait')
-        and run_at <= ${now}
+        and run_at <= ${now.toISOString()}
         and attempt_count < max_attempts
       order by priority desc, run_at asc, created_at asc
       for update skip locked
@@ -189,12 +189,12 @@ export async function claimWorkflowTask(
     set status = 'running',
         attempt_count = task.attempt_count + 1,
         locked_by = ${workerId},
-        locked_at = ${now},
-        lease_expires_at = ${now} + (${leaseDurationMs} * interval '1 millisecond'),
+        locked_at = ${now.toISOString()},
+        lease_expires_at = ${now.toISOString()} + (${leaseDurationMs} * interval '1 millisecond'),
         last_error_code = null,
         last_error_message = null,
         completed_at = null,
-        updated_at = ${now}
+        updated_at = ${now.toISOString()}
     from candidate
     where task.id = candidate.id
     returning
@@ -228,12 +228,12 @@ export async function renewWorkflowTaskLease(
   const now = input.now ?? new Date();
   const rows = await database.execute(sql`
     update ${workflowTasks}
-    set lease_expires_at = ${now} + (${leaseDurationMs} * interval '1 millisecond'),
-        updated_at = ${now}
+    set lease_expires_at = ${now.toISOString()} + (${leaseDurationMs} * interval '1 millisecond'),
+        updated_at = ${now.toISOString()}
     where id = ${taskId}
       and status = 'running'
       and locked_by = ${workerId}
-      and lease_expires_at > ${now}
+      and lease_expires_at > ${now.toISOString()}
     returning id
   `);
   return rows.length === 1;
@@ -256,12 +256,12 @@ export async function completeWorkflowTask(
         locked_by = null,
         locked_at = null,
         lease_expires_at = null,
-        completed_at = ${now},
-        updated_at = ${now}
+        completed_at = ${now.toISOString()},
+        updated_at = ${now.toISOString()}
     where id = ${taskId}
       and status = 'running'
       and locked_by = ${workerId}
-      and lease_expires_at > ${now}
+      and lease_expires_at > ${now.toISOString()}
     returning id
   `);
   return rows.length === 1;
@@ -303,7 +303,7 @@ export async function failWorkflowTask(
         end,
         run_at = case
           when ${input.retryable} and attempt_count < max_attempts
-            then ${now} + (
+            then ${now.toISOString()} + (
               least(300, power(2, greatest(attempt_count - 1, 0)))
               * interval '1 second'
             )
@@ -316,20 +316,20 @@ export async function failWorkflowTask(
         last_error_message = ${errorMessage},
         completed_at = case
           when ${input.retryable} and attempt_count < max_attempts then null
-          else ${now}
+          else ${now.toISOString()}
         end,
-        updated_at = ${now}
+        updated_at = ${now.toISOString()}
     where id = ${taskId}
       and status = 'running'
       and locked_by = ${workerId}
-      and lease_expires_at > ${now}
+      and lease_expires_at > ${now.toISOString()}
     returning status, run_at, kind, payload, workspace_id
     ), failed_match as (
       update ${campaignJobMatches} as match
       set pipeline_status = 'failed',
           failed_step = 'analyze-match',
           failure_code = ${errorCode},
-          updated_at = ${now}
+          updated_at = ${now.toISOString()}
       from failed_task
       where failed_task.status = 'dead'
         and failed_task.kind = 'analyze-match'
@@ -339,7 +339,7 @@ export async function failWorkflowTask(
       returning match.id
     ), rejected_job as (
       update ${jobs} as job
-      set status = 'rejected', updated_at = ${now}
+      set status = 'rejected', updated_at = ${now.toISOString()}
       from failed_task
       where failed_task.status = 'dead'
         and failed_task.kind = 'normalize-job'
@@ -353,7 +353,7 @@ export async function failWorkflowTask(
           next_run_at = null,
           last_error_code = ${errorCode},
           consecutive_failure_count = monitor.consecutive_failure_count + 1,
-          updated_at = ${now}
+          updated_at = ${now.toISOString()}
       from failed_task
       where failed_task.status = 'dead'
         and failed_task.kind = 'poll-upwork-monitor'
@@ -387,7 +387,7 @@ export async function recoverExpiredWorkflowTasks(
         end,
         run_at = case
           when attempt_count < max_attempts
-            then ${now} + (
+            then ${now.toISOString()} + (
               least(300, power(2, greatest(attempt_count - 1, 0)))
               * interval '1 second'
             )
@@ -398,17 +398,17 @@ export async function recoverExpiredWorkflowTasks(
         lease_expires_at = null,
         last_error_code = 'lease_expired',
         last_error_message = 'The previous worker lease expired before completion.',
-        completed_at = case when attempt_count < max_attempts then null else ${now} end,
-        updated_at = ${now}
+        completed_at = case when attempt_count < max_attempts then null else ${now.toISOString()} end,
+        updated_at = ${now.toISOString()}
     where status = 'running'
-      and lease_expires_at <= ${now}
+      and lease_expires_at <= ${now.toISOString()}
     returning id, status, kind, payload, workspace_id
     ), failed_match as (
       update ${campaignJobMatches} as match
       set pipeline_status = 'failed',
           failed_step = 'analyze-match',
           failure_code = 'lease_expired',
-          updated_at = ${now}
+          updated_at = ${now.toISOString()}
       from recovered_task
       where recovered_task.status = 'dead'
         and recovered_task.kind = 'analyze-match'
@@ -418,7 +418,7 @@ export async function recoverExpiredWorkflowTasks(
       returning match.id
     ), rejected_job as (
       update ${jobs} as job
-      set status = 'rejected', updated_at = ${now}
+      set status = 'rejected', updated_at = ${now.toISOString()}
       from recovered_task
       where recovered_task.status = 'dead'
         and recovered_task.kind = 'normalize-job'
@@ -432,7 +432,7 @@ export async function recoverExpiredWorkflowTasks(
           next_run_at = null,
           last_error_code = 'lease_expired',
           consecutive_failure_count = monitor.consecutive_failure_count + 1,
-          updated_at = ${now}
+          updated_at = ${now.toISOString()}
       from recovered_task
       where recovered_task.status = 'dead'
         and recovered_task.kind = 'poll-upwork-monitor'
@@ -467,7 +467,7 @@ export async function retryDeadWorkflowTask(
     with retried_task as (
       update ${workflowTasks}
       set status = 'queued',
-          run_at = ${now},
+          run_at = ${now.toISOString()},
           attempt_count = 0,
           locked_by = null,
           locked_at = null,
@@ -475,7 +475,7 @@ export async function retryDeadWorkflowTask(
           last_error_code = null,
           last_error_message = null,
           completed_at = null,
-          updated_at = ${now}
+          updated_at = ${now.toISOString()}
       where id = ${taskId}
         and workspace_id = ${workspaceId}
         and status = 'dead'
@@ -485,7 +485,7 @@ export async function retryDeadWorkflowTask(
       set pipeline_status = 'analysis_queued',
           failed_step = null,
           failure_code = null,
-          updated_at = ${now}
+          updated_at = ${now.toISOString()}
       from retried_task
       where retried_task.kind = 'analyze-match'
         and match.workspace_id = retried_task.workspace_id
@@ -495,7 +495,7 @@ export async function retryDeadWorkflowTask(
       returning match.id
     ), reset_job as (
       update ${jobs} as job
-      set status = 'received', updated_at = ${now}
+      set status = 'received', updated_at = ${now.toISOString()}
       from retried_task
       where retried_task.kind = 'normalize-job'
         and job.id::text = retried_task.payload ->> 'jobId'
@@ -506,9 +506,9 @@ export async function retryDeadWorkflowTask(
     ), reset_monitor as (
       update ${upworkMonitors} as monitor
       set status = 'active',
-          next_run_at = ${now},
+          next_run_at = ${now.toISOString()},
           last_error_code = null,
-          updated_at = ${now}
+          updated_at = ${now.toISOString()}
       from retried_task
       where retried_task.kind = 'poll-upwork-monitor'
         and monitor.workspace_id = retried_task.workspace_id
