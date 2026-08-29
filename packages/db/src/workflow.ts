@@ -190,7 +190,7 @@ export async function claimWorkflowTask(
         attempt_count = task.attempt_count + 1,
         locked_by = ${workerId},
         locked_at = ${now.toISOString()},
-        lease_expires_at = ${now.toISOString()} + (${leaseDurationMs} * interval '1 millisecond'),
+        lease_expires_at = ${now.toISOString()}::timestamptz + (${leaseDurationMs} * interval '1 millisecond'),
         last_error_code = null,
         last_error_message = null,
         completed_at = null,
@@ -228,7 +228,7 @@ export async function renewWorkflowTaskLease(
   const now = input.now ?? new Date();
   const rows = await database.execute(sql`
     update ${workflowTasks}
-    set lease_expires_at = ${now.toISOString()} + (${leaseDurationMs} * interval '1 millisecond'),
+    set lease_expires_at = ${now.toISOString()}::timestamptz + (${leaseDurationMs} * interval '1 millisecond'),
         updated_at = ${now.toISOString()}
     where id = ${taskId}
       and status = 'running'
@@ -303,7 +303,7 @@ export async function failWorkflowTask(
         end,
         run_at = case
           when ${input.retryable} and attempt_count < max_attempts
-            then ${now.toISOString()} + (
+            then ${now.toISOString()}::timestamptz + (
               least(300, power(2, greatest(attempt_count - 1, 0)))
               * interval '1 second'
             )
@@ -387,7 +387,7 @@ export async function recoverExpiredWorkflowTasks(
         end,
         run_at = case
           when attempt_count < max_attempts
-            then ${now.toISOString()} + (
+            then ${now.toISOString()}::timestamptz + (
               least(300, power(2, greatest(attempt_count - 1, 0)))
               * interval '1 second'
             )
