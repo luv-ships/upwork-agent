@@ -316,7 +316,7 @@ export async function failWorkflowTask(
         last_error_message = ${errorMessage},
         completed_at = case
           when ${input.retryable} and attempt_count < max_attempts then null
-          else ${now.toISOString()}
+          else ${now.toISOString()}::timestamptz
         end,
         updated_at = ${now.toISOString()}
     where id = ${taskId}
@@ -398,7 +398,7 @@ export async function recoverExpiredWorkflowTasks(
         lease_expires_at = null,
         last_error_code = 'lease_expired',
         last_error_message = 'The previous worker lease expired before completion.',
-        completed_at = case when attempt_count < max_attempts then null else ${now.toISOString()} end,
+        completed_at = case when attempt_count < max_attempts then null else ${now.toISOString()}::timestamptz end,
         updated_at = ${now.toISOString()}
     where status = 'running'
       and lease_expires_at <= ${now.toISOString()}
