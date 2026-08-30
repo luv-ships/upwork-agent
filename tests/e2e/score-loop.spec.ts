@@ -77,4 +77,10 @@ test("authenticated user receives scored jobs from the fake monitor and developm
 
   await page.getByRole("button", { name: "Pause monitor" }).click();
   await expect(page.getByRole("button", { name: "Resume monitor" })).toBeVisible();
+
+  await page.goto(campaignUrl);
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Delete campaign" }).click();
+  await expect(page).toHaveURL(/\/app\/campaigns$/);
+  await expect(page.getByRole("heading", { name: campaignName })).not.toBeVisible();
 });

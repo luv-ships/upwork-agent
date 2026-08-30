@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  Archive,
   ArrowLeft,
   BrainCircuit,
   CheckCircle2,
@@ -40,6 +41,7 @@ import {
   pauseUpworkMonitorAction,
   updateCampaignBasicsAction
 } from "@/server/actions/campaigns";
+import { DeleteCampaignButton } from "@/components/campaign/delete-campaign-button";
 import { requireUser } from "@/server/auth";
 import { getDatabase } from "@/server/database";
 import { getServerEnvironment } from "@/server/env";
@@ -171,26 +173,29 @@ export default async function CampaignDetailPage({
             </div>
             <p className="mt-2 text-sm text-slate-600">Threshold {campaign.scoreThreshold} · Configuration v{campaign.configVersion}</p>
           </div>
-          {campaign.status !== "archived" ? (
-            <div className="flex gap-2">
-              <Link className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2" href={`/app/campaigns/${campaign.id}/edit`}>
-                <Pencil className="mr-2 size-4" aria-hidden="true" />Edit filters
-              </Link>
-              <form action={changeCampaignStatusAction}>
-                <input name="campaignId" type="hidden" value={campaign.id} />
-                <input name="configVersion" type="hidden" value={campaign.configVersion} />
-                <input name="status" type="hidden" value={campaign.status === "active" ? "paused" : "active"} />
-                <Button variant="secondary" type="submit">
-                  {campaign.status === "active" ? <Pause className="mr-2 size-4" aria-hidden="true" /> : <Play className="mr-2 size-4" aria-hidden="true" />}
-                  {campaign.status === "active" ? "Pause" : "Activate"}
-                </Button>
-              </form>
-              <form action={archiveCampaignAction}>
-                <input name="campaignId" type="hidden" value={campaign.id} />
-                <Button variant="ghost" type="submit"><Trash2 className="mr-2 size-4" aria-hidden="true" />Archive</Button>
-              </form>
-            </div>
-          ) : null}
+          <div className="flex gap-2">
+            {campaign.status !== "archived" ? (
+              <>
+                <Link className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2" href={`/app/campaigns/${campaign.id}/edit`}>
+                  <Pencil className="mr-2 size-4" aria-hidden="true" />Edit filters
+                </Link>
+                <form action={changeCampaignStatusAction}>
+                  <input name="campaignId" type="hidden" value={campaign.id} />
+                  <input name="configVersion" type="hidden" value={campaign.configVersion} />
+                  <input name="status" type="hidden" value={campaign.status === "active" ? "paused" : "active"} />
+                  <Button variant="secondary" type="submit">
+                    {campaign.status === "active" ? <Pause className="mr-2 size-4" aria-hidden="true" /> : <Play className="mr-2 size-4" aria-hidden="true" />}
+                    {campaign.status === "active" ? "Pause" : "Activate"}
+                  </Button>
+                </form>
+                <form action={archiveCampaignAction}>
+                  <input name="campaignId" type="hidden" value={campaign.id} />
+                  <Button variant="ghost" type="submit"><Archive className="mr-2 size-4" aria-hidden="true" />Archive</Button>
+                </form>
+              </>
+            ) : null}
+            <DeleteCampaignButton campaignId={campaign.id} campaignName={campaign.name} />
+          </div>
         </div>
       </div>
 

@@ -5,7 +5,7 @@ import {
   type CampaignFilterV1,
   type DevelopmentJobInput,
 } from "@upwork-agent/core";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import type { Database } from "./database.js";
@@ -358,6 +358,78 @@ export async function archiveCampaign(
   input: { readonly ownerUserId: string; readonly campaignId: string },
 ): Promise<CampaignRow | null> {
   return updateCampaign(database, { ...input, status: "archived" });
+}
+
+/**
+ * Permanently deletes one owned campaign and its campaign-scoped workflow
+ * artifacts. Jobs remain because a workspace job may be shared by campaigns.
+ */
+export async function deleteCampaign(
+  database: Database,
+  input: { readonly ownerUserId: string; readonly campaignId: string },
+): Promise<boolean> {
+  const ownerUserId = uuidSchema.parse(input.ownerUserId);
+  const campaignId = uuidSchema.parse(input.campaignId);
+
+  return database.transaction(async (transaction) => {
+    const ownedRows = await transaction
+      .select({ id: campaigns.id, workspaceId: campaigns.workspaceId })
+      .from(campaigns)
+      .innerJoin(workspaces, eq(campaigns.workspaceId, workspaces.id))
+      .where(
+        and(
+          eq(campaigns.id, campaignId),
+          eq(workspaces.ownerUserId, ownerUserId),
+        ),
+      )
+      .for("update")
+      .limit(1);
+    const ownedCampaign = ownedRows[0];
+    if (ownedCampaign === undefined) {
+      return false;
+    }
+
+    const monitorRows = await transaction
+      .select({ id: upworkMonitors.id })
+      .from(upworkMonitors)
+      .where(
+        and(
+          eq(upworkMonitors.workspaceId, ownedCampaign.workspaceId),
+          eq(upworkMonitors.campaignId, campaignId),
+        ),
+      );
+    const taskPredicates = [
+      sql`${workflowTasks.payload} ->> 'matchId' in (
+        select ${campaignJobMatches.id}::text
+        from ${campaignJobMatches}
+        where ${campaignJobMatches.workspaceId} = ${ownedCampaign.workspaceId}
+          and ${campaignJobMatches.campaignId} = ${campaignId}
+      )`,
+      ...monitorRows.map(
+        (monitor) =>
+          sql`${workflowTasks.payload} ->> 'monitorId' = ${monitor.id}`,
+      ),
+    ];
+    await transaction
+      .delete(workflowTasks)
+      .where(
+        and(
+          eq(workflowTasks.workspaceId, ownedCampaign.workspaceId),
+          or(...taskPredicates),
+        ),
+      );
+
+    const deletedRows = await transaction
+      .delete(campaigns)
+      .where(
+        and(
+          eq(campaigns.id, ownedCampaign.id),
+          eq(campaigns.workspaceId, ownedCampaign.workspaceId),
+        ),
+      )
+      .returning({ id: campaigns.id });
+    return deletedRows.length === 1;
+  });
 }
 
 export interface IngestDevelopmentJobInput {

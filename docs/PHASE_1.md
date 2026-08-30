@@ -58,7 +58,7 @@ that an AI result exists before it has been stored.
 ### In scope
 
 - Supabase Google OAuth authentication and one-owner workspace bootstrap.
-- Campaign create/read/update/archive with the approved `CampaignFilterV1`, AI
+- Campaign create/read/update/archive/delete with the approved `CampaignFilterV1`, AI
   instructions, and a campaign-specific score threshold. The form includes the
   supplied category, experience, job-type, rate/budget, proposal-count, client,
   location/time-zone, project-length, hours, and contract-to-hire filters;

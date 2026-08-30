@@ -10,6 +10,7 @@ export {
   archiveCampaign,
   ConcurrentCampaignUpdateError,
   createCampaign,
+  deleteCampaign,
   DevelopmentJobPayloadConflictError,
   ensureWorkspaceForUser,
   getCampaign,

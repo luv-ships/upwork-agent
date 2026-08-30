@@ -24,6 +24,7 @@ import {
   completeWorkflowTask,
   createCampaign,
   createDatabase,
+  deleteCampaign,
   DevelopmentJobPayloadConflictError,
   disconnectUpworkOAuthConnection,
   enableConnectedUpworkMonitor,
@@ -165,6 +166,43 @@ integrationDescribe("Phase 1 database integration", () => {
     await expect(
       getCampaign(database, {
         ownerUserId: secondUserId,
+        campaignId: campaign.id,
+      }),
+    ).resolves.toBeNull();
+  });
+
+  it("deletes an owned campaign and rejects a cross-workspace delete", async () => {
+    const workspace = await ensureWorkspaceForUser(database, {
+      ownerUserId: liveUserId,
+      name: "Delete-test workspace",
+    });
+    const campaign = await createCampaign(database, {
+      ownerUserId: liveUserId,
+      workspaceId: workspace.id,
+      name: "Delete test",
+      filters: emptyCampaignFilterV1,
+      aiInstructions: "",
+      status: "active",
+    });
+    if (campaign === null) {
+      throw new Error("Delete-test campaign was not created");
+    }
+
+    await expect(
+      deleteCampaign(database, {
+        ownerUserId: firstUserId,
+        campaignId: campaign.id,
+      }),
+    ).resolves.toBe(false);
+    await expect(
+      deleteCampaign(database, {
+        ownerUserId: liveUserId,
+        campaignId: campaign.id,
+      }),
+    ).resolves.toBe(true);
+    await expect(
+      getCampaign(database, {
+        ownerUserId: liveUserId,
         campaignId: campaign.id,
       }),
     ).resolves.toBeNull();

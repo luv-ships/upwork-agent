@@ -315,6 +315,12 @@ All IDs are UUIDs generated in Postgres. Unless noted, tables include
 null default now()`. Domain data is archived/statused rather than broadly
 soft-deleted. All monetary amounts use `numeric`, never floating point.
 
+Campaigns also have an explicit, user-confirmed permanent-delete action. It
+verifies workspace ownership, removes campaign-scoped monitors, matches,
+scores, proposals, and pending campaign workflow tasks through the existing
+cascade/cleanup paths, and retains workspace jobs because a job can be shared
+by more than one campaign. Archive remains the reversible lifecycle action.
+
 ### Product entities
 
 | Entity / table | Essential fields | Invariants and notes |

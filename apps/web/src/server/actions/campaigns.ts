@@ -7,6 +7,7 @@ import { campaignFilterV1Schema } from "@upwork-agent/core";
 import {
   archiveCampaign,
   createCampaign,
+  deleteCampaign,
   disconnectUpworkOAuthConnection,
   enableConnectedUpworkMonitor,
   enableFakeUpworkMonitor,
@@ -247,6 +248,14 @@ export async function archiveCampaignAction(formData: FormData): Promise<void> {
   const user = await requireUser();
   const campaignId = z.uuid().parse(formData.get("campaignId"));
   await archiveCampaign(getDatabase(), { ownerUserId: user.id, campaignId });
+  revalidatePath("/app/campaigns");
+  redirect("/app/campaigns");
+}
+
+export async function deleteCampaignAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const campaignId = z.uuid().parse(formData.get("campaignId"));
+  await deleteCampaign(getDatabase(), { ownerUserId: user.id, campaignId });
   revalidatePath("/app/campaigns");
   redirect("/app/campaigns");
 }
