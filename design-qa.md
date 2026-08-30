@@ -21,8 +21,9 @@ The dashboard previews now use the eight supplied high-resolution PNGs from
 - analytics → advanced analytics (`07_bidwork_analytics_dashboard.png`)
 - academy → BidWork Academy (`08_bidwork_academy_dashboard.png`)
 
-The supplied logo mark from `/Users/luv/Desktop/Screenshot 2026-08-30 at
-3.17.34 AM.png` is used in the header and footer brand lockup. The dashboard
+The supplied logo mark from `/Users/luv/Downloads/Black_and_White_Simple_Bold_Typographic_Creative_Studio_Logo-removebg-preview.png`
+is used in the landing header and footer, sign-in screen, authenticated app
+header, and favicon. The dashboard
 PNGs retain their intrinsic dimensions and aspect ratios; they are not cropped,
 stretched, or recompressed by the landing page.
 
@@ -31,8 +32,11 @@ stretched, or recompressed by the landing page.
 The implementation is `/` in `apps/web/src/app/page.tsx`, rendered as a
 responsive React component tree with CSS sections for the header, hero
 dashboard, trust cards, matching, campaigns, controls, analytics, comparison,
-stories, and footer. The supplied artboards remain visual reference material for
-the page layout; the eight dashboard PNGs and logo are used as page assets.
+stories, and footer. The sign-in and authenticated app shell share the BidWork
+brand lockup in `apps/web/src/app/sign-in/page.tsx` and
+`apps/web/src/app/app/layout.tsx`. The supplied artboards remain visual reference
+material for the page layout; the eight dashboard PNGs and logo are used as page
+assets.
 
 Implementation screenshot: not captured. The production preview starts and
 returns HTTP 200 locally, but the browser visual capture was blocked by the

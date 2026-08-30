@@ -1,4 +1,5 @@
-import { BookOpen, FlaskConical, LogOut, Radar, Send } from "lucide-react";
+import { BookOpen, FlaskConical, LogOut, Send } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -25,10 +26,16 @@ export default async function AppLayout({ children }: Readonly<{ children: React
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex min-h-16 max-w-7xl items-center gap-6 px-4 sm:px-6 lg:px-8">
           <Link className="flex items-center gap-2.5 font-semibold tracking-tight text-slate-950" href="/app/campaigns">
-            <span className="grid size-9 place-items-center rounded-xl bg-slate-950 text-white">
-              <Radar className="size-5" aria-hidden="true" />
-            </span>
-            <span className="hidden sm:inline">SignalFound</span>
+            <Image
+              alt=""
+              aria-hidden="true"
+              className="size-9 object-contain"
+              height={500}
+              src="/landing/bidwork-logo-mark.png"
+              unoptimized
+              width={500}
+            />
+            <span className="hidden sm:inline">BidWork<span className="text-xs font-semibold">.app</span></span>
           </Link>
 
           <nav aria-label="Primary" className="flex flex-1 items-center gap-1">

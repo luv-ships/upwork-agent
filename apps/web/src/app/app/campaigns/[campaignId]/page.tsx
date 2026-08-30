@@ -83,7 +83,7 @@ function displayFilterValue(value: unknown): string {
   if (Array.isArray(value)) return value.join(", ");
   if (typeof value === "object" && value !== null) {
     const range = value as { min?: unknown; max?: unknown };
-    return `${range.min === undefined ? "Any" : String(range.min)} – ${range.max === undefined ? "Any" : String(range.max)}`;
+    return `${range.min === undefined ? "Any" : String(range.min)} to ${range.max === undefined ? "Any" : String(range.max)}`;
   }
   return String(value).replaceAll("_", " ");
 }
