@@ -185,32 +185,36 @@ export async function createCampaign(
   const scoreThreshold = scoreThresholdSchema.parse(input.scoreThreshold ?? 75);
   const status = campaignStatusSchema.parse(input.status ?? "draft");
 
-  const rows = await database
-    .insert(campaigns)
-    .select(
-      database
-        .select({
-          workspaceId: workspaces.id,
-          name: sql<string>`${name}`.as("name"),
-          status: sql<CampaignRow["status"]>`${status}::public.campaign_status`.as(
-            "status",
-          ),
-          filters: sql<CampaignFilterV1>`${JSON.stringify(filters)}::jsonb`.as(
-            "filters",
-          ),
-          aiInstructions: sql<string>`${aiInstructions}`.as("ai_instructions"),
-          scoreThreshold: sql<number>`${scoreThreshold}`.as("score_threshold"),
-        })
-        .from(workspaces)
-        .where(
-          and(
-            eq(workspaces.id, workspaceId),
-            eq(workspaces.ownerUserId, ownerUserId),
-          ),
+  return database.transaction(async (transaction) => {
+    const workspaceRows = await transaction
+      .select({ id: workspaces.id })
+      .from(workspaces)
+      .where(
+        and(
+          eq(workspaces.id, workspaceId),
+          eq(workspaces.ownerUserId, ownerUserId),
         ),
-    )
-    .returning();
-  return rows[0] ?? null;
+      )
+      .for("update")
+      .limit(1);
+    const workspace = workspaceRows[0];
+    if (workspace === undefined) {
+      return null;
+    }
+
+    const rows = await transaction
+      .insert(campaigns)
+      .values({
+        workspaceId: workspace.id,
+        name,
+        status,
+        filters,
+        aiInstructions,
+        scoreThreshold,
+      })
+      .returning();
+    return rows[0] ?? null;
+  });
 }
 
 export interface UpdateCampaignInput {

@@ -134,7 +134,7 @@ integrationDescribe("Phase 1 database integration", () => {
       ownerUserId: firstUserId,
       name: "First workspace",
     });
-    await ensureWorkspaceForUser(database, {
+    const secondWorkspace = await ensureWorkspaceForUser(database, {
       ownerUserId: secondUserId,
       name: "Second workspace",
     });
@@ -150,6 +150,17 @@ integrationDescribe("Phase 1 database integration", () => {
     if (campaign === null) {
       throw new Error("Campaign was not created");
     }
+
+    await expect(
+      createCampaign(database, {
+        ownerUserId: firstUserId,
+        workspaceId: secondWorkspace.id,
+        name: "Cross-workspace campaign",
+        filters: emptyCampaignFilterV1,
+        aiInstructions: "",
+        status: "active",
+      }),
+    ).resolves.toBeNull();
 
     await expect(
       getCampaign(database, {
