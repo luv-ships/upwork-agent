@@ -1,16 +1,10 @@
 import {
-  ArrowLeft,
   ArrowRight,
   BarChart3,
   Bell,
-  BookOpen,
   BriefcaseBusiness,
   CalendarDays,
   Check,
-  Circle,
-  CircleDot,
-  ChevronDown,
-  ChevronRight,
   Clock3,
   Code2,
   FileText,
@@ -19,13 +13,10 @@ import {
   GraduationCap,
   Infinity as InfinityIcon,
   Eye,
-  LayoutDashboard,
   LineChart,
   Mail,
   MessageCircle,
   Moon,
-  Plus,
-  Search,
   Send,
   Settings2,
   ShieldCheck,
@@ -39,6 +30,7 @@ import {
   Users,
   Zap
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 
@@ -50,7 +42,15 @@ type Icon = LucideIcon;
 function Brand() {
   return (
     <Link className="landing-brand" href="/" aria-label="BidWork.app home">
-      <span className="landing-brand-mark" aria-hidden="true"><Sun size={22} strokeWidth={2.6} /></span>
+      <Image
+        alt=""
+        aria-hidden="true"
+        className="landing-brand-image"
+        height={160}
+        src="/landing/bidwork-logo-mark.png"
+        unoptimized
+        width={200}
+      />
       <span>BidWork<span className="landing-brand-dot">.app</span></span>
     </Link>
   );
@@ -76,17 +76,52 @@ function StarRow() {
   return <span className="landing-stars" aria-label="5 out of 5 stars">{[1, 2, 3, 4, 5].map((star) => <Star key={star} size={15} fill="currentColor" strokeWidth={0} />)}</span>;
 }
 
+function DashboardShot({
+  alt,
+  className = "",
+  height,
+  priority = false,
+  src,
+  width
+}: {
+  alt: string;
+  className?: string;
+  height: number;
+  priority?: boolean;
+  src: string;
+  width: number;
+}) {
+  return (
+    <figure className={`landing-dashboard-shot ${className}`}>
+      <Image
+        alt={alt}
+        className="landing-dashboard-shot-image"
+        height={height}
+        priority={priority}
+        sizes="(max-width: 640px) calc(100vw - 52px), (max-width: 900px) calc(100vw - 88px), 900px"
+        src={src}
+        unoptimized
+        width={width}
+      />
+    </figure>
+  );
+}
+
 function Header() {
   return <header className="landing-header"><div className="landing-container landing-header-inner"><Brand /><nav aria-label="Primary navigation" className="landing-nav"><a href="#product">Product</a><a href="#features">Features</a><a href="#campaigns">Pricing</a><a href="#proof">Proof</a><a href="#footer">FAQ</a></nav><div className="landing-header-actions"><button type="button" aria-label="Light mode" className="landing-icon-button"><Sun size={19} /></button><button type="button" aria-label="Dark mode" className="landing-icon-button"><Moon size={18} /></button><Link className="landing-button landing-button-outline landing-button-small" href="/sign-in">Log in</Link><Link className="landing-button landing-button-primary landing-button-small" href={signInHref}>Start Free <ArrowRight size={16} /></Link></div></div></header>;
 }
 
-function MetricCard({ label, value, note, icon: Icon, tone }: { label: string; value: string; note: string; icon: Icon; tone: "teal" | "blue" | "orange" }) {
-  return <div className="landing-metric-card"><div><p>{label}</p><strong>{value}</strong><small>{note}</small></div><span className={`landing-metric-icon landing-metric-icon-${tone}`}><Icon size={18} /></span></div>;
-}
-
 function HeroDashboard() {
-  const jobs = [["Webflow Developer for SaaS Landing Page", "96", "$2,000", "15m ago"], ["UX/UI Designer for Fintech Dashboard", "93", "$1,800", "28m ago"], ["Technical SEO Audit & Strategy", "91", "$1,200", "42m ago"], ["Shopify Developer for Store Redesign", "88", "$1,500", "1h ago"], ["GoHighLevel CRM Automation Expert", "87", "$1,000", "1h ago"]];
-  return <div className="landing-dashboard" aria-label="BidWork dashboard preview"><aside className="landing-dashboard-sidebar"><Brand /><div className="landing-dashboard-nav"><span className="is-active"><LayoutDashboard size={14} />Dashboard</span><span><BriefcaseBusiness size={14} />Matched Jobs</span><span><FileText size={14} />Proposals</span><span><Send size={14} />Campaigns</span><span><MessageCircle size={14} />Messages</span><span><BarChart3 size={14} />Analytics</span><span><Settings2 size={14} />Settings</span></div><div className="landing-plan-card"><strong>Pro Plan · 5 seats</strong><span>Manage plan</span></div><div className="landing-user-row"><Avatar initials="OC" tone="sand" /><div><strong>Olivia Carter</strong><small>Agency Owner</small></div><ChevronDown size={14} /></div></aside><div className="landing-dashboard-main"><div className="landing-dashboard-heading"><div><h3>Dashboard</h3><p>Your AI-driven overview.</p></div><div className="landing-dashboard-toolbar"><span>Auto-pilot <i className="landing-switch" /></span><Bell size={16} /><button type="button">All categories <ChevronDown size={13} /></button></div></div><div className="landing-metric-grid"><MetricCard label="Matched Today" value="48" note="High-fit opportunities" icon={BriefcaseBusiness} tone="teal" /><MetricCard label="Proposals Sent" value="27" note="Manual & Autopilot" icon={Send} tone="blue" /><MetricCard label="Replies" value="14" note="51.9% reply rate" icon={MessageCircle} tone="teal" /><MetricCard label="Won" value="5" note="18.5% win rate" icon={Trophy} tone="orange" /></div><div className="landing-dashboard-columns"><div className="landing-panel landing-job-panel"><div className="landing-panel-heading"><strong>Top Matched Jobs</strong><a href="#features">View all</a></div><div className="landing-job-list">{jobs.map(([title, score, budget, age]) => <div className="landing-job-row" key={title}><span className="landing-score-ring">{score}</span><div><strong>{title}</strong><small>{budget} · Fixed Price · Posted {age}</small></div><ChevronRight size={15} /></div>)}</div><a className="landing-panel-link" href="#features">View all matched jobs <ArrowRight size={14} /></a></div><div className="landing-panel landing-proposal-panel"><div className="landing-panel-heading"><strong>Proposal Preview</strong><a href="#campaigns">Edit</a></div><p>Hi James,</p><p>I delivered a clear plan for your high-converting landing page and would love to help bring it to life.</p><CheckList items={["Pixel-perfect responsive build", "Performance optimized", "Easy-to-manage CMS", "On-time delivery"]} /><div className="landing-proposal-footer"><small>Estimated timeline: 5–7 days</small><button type="button">Use Proposal</button></div></div><div className="landing-panel landing-quality-panel"><div className="landing-panel-heading"><strong>Client Quality</strong><a href="#proof">Why it matters</a></div><div className="landing-quality-score"><span className="landing-score-ring landing-score-ring-large">95<small>/100</small></span><span><strong>Great Fit</strong><small>Excellent client signals</small></span></div><CheckList items={["Payment method verified", "$20K+ total spent", "95%+ hire rate", "Active in last 2 days"]} /><a className="landing-panel-link" href="#proof">View client profile <ArrowRight size={14} /></a></div></div></div></div>;
+  return (
+    <DashboardShot
+      alt="BidWork overview dashboard showing matched jobs, proposal preview, client quality, and performance metrics."
+      className="landing-dashboard-shot-hero"
+      height={1767}
+      priority
+      src="/landing/dashboards/01_bidwork_overview_dashboard.png"
+      width={2560}
+    />
+  );
 }
 
 function Hero() {
@@ -100,7 +135,14 @@ function TrustSection() {
 }
 
 function MatchDetail() {
-  return <div className="landing-match-detail"><div className="landing-match-top"><div><a href="#features"><ArrowLeft size={12} /> Back to Matched Jobs</a><h3>Senior Webflow Developer for SaaS Landing Page</h3><div className="landing-tag-row"><span>High Match</span><span>New</span><small>Posted 2 hours ago · Fixed Price · $2,000 · Expert Level</small></div></div><div className="landing-fit-score"><span className="landing-score-ring landing-score-ring-xl">96</span><div><strong>Excellent Match</strong><small>Top 5% of jobs</small></div></div></div><div className="landing-match-grid"><div><div className="landing-mini-panel"><strong>Job Summary</strong><p>We need a Webflow expert to build a high-converting landing page for our new SaaS product launch.</p><a href="#features">More details <ArrowRight size={13} /></a></div><div className="landing-mini-panel"><strong>Skills &amp; Expertise</strong><div className="landing-chip-row"><span>Webflow</span><span>Figma</span><span>Landing Page Design</span><span>CMS</span><span>GSAP</span></div><div className="landing-mini-stats"><span><small>Project Type</small>One-time project</span><span><small>Project Length</small>1 to 3 months</span></div></div></div><div className="landing-mini-panel landing-screening-panel"><div className="landing-panel-heading"><strong>Screening Questions</strong><span className="landing-good-fit">Good Fit</span></div>{["Have you built landing pages in Webflow?", "Can you integrate with third-party tools?", "Share a recent landing page you built."].map((question) => <div className="landing-question" key={question}><strong>Q: {question}</strong><span>Your answer: <b>{question.startsWith("Share") ? "Provided" : "Yes"}</b> <Check size={12} /></span></div>)}<div className="landing-progress"><span>4 of 4 answered</span><i><b /></i></div></div><div className="landing-mini-panel landing-positive-panel"><strong>Positive Signals</strong><CheckList items={["Payment method verified", "$50K+ total spent", "95%+ hire rate", "12+ jobs posted", "Long-term client (2+ years)"]} /><div className="landing-watch"><strong>Watch Out For</strong><span>Project scope is broad</span><span>Tight 2-week deadline</span></div></div></div><div className="landing-match-bottom"><span><strong>AC</strong><b>Acme SaaS Inc.</b><small><StarRow />4.9 (128 reviews) · United States</small></span><span><strong>18</strong><small>Previous projects</small></span><span><strong>Posted 2 hours ago</strong><small>4 proposals so far</small></span></div></div>;
+  return (
+    <DashboardShot
+      alt="BidWork smart matching dashboard showing a 96 fit score, screening answers, positive client signals, and risk warnings."
+      height={1710}
+      src="/landing/dashboards/02_bidwork_smart_matching_dashboard.png"
+      width={2560}
+    />
+  );
 }
 
 function MatchingSection() {
@@ -108,13 +150,25 @@ function MatchingSection() {
 }
 
 function MiniCampaignTable() {
-  const rows = [["SaaS Marketing – US", "Active", "312", "28", "21.3%", "13.2%"], ["E-commerce – UK & AU", "Active", "186", "17", "19.4%", "11.8%"], ["Fintech – Enterprise", "Active", "142", "12", "24.8%", "14.7%"], ["Healthcare – North America", "Draft", "98", "6", "18.9%", "9.4%"], ["B2B SaaS – Seed to Series B", "Paused", "76", "4", "16.2%", "8.1%"]];
-  return <div className="landing-mini-app"><div className="landing-mini-app-top"><Brand /><div className="landing-search"><Search size={13} />Search campaigns...</div><Bell size={14} /><Avatar initials="OC" tone="sand" /></div><div className="landing-mini-app-body"><div className="landing-mini-app-side"><span>Dashboard</span><span>Matched Jobs</span><span>Proposals</span><span className="is-active">Campaigns</span><span>Messages</span><span>Analytics</span><span>Settings</span></div><div className="landing-mini-app-content"><div className="landing-mini-title"><div><h4>Campaigns</h4><p>Find and track opportunities that match your ideal client profile.</p></div><button type="button"><Plus size={13} />New Campaign</button></div><div className="landing-table-filters"><span>All Status <ChevronDown size={11} /></span><span>All Countries <ChevronDown size={11} /></span><span>All Niches <ChevronDown size={11} /></span><span>All Budgets <ChevronDown size={11} /></span></div><table><thead><tr><th>Name</th><th>Status</th><th>Matches</th><th>New (7d)</th><th>Reply Rate</th><th>Win Rate</th></tr></thead><tbody>{rows.map((row) => <tr key={row[0]}>{row.map((cell, index) => <td key={`${row[0]}-${cell}`}>{index === 1 ? <span className={`landing-status landing-status-${cell.toLowerCase()}`}><i />{cell}</span> : cell}</td>)}</tr>)}</tbody></table></div></div></div>;
+  return (
+    <DashboardShot
+      alt="BidWork campaigns dashboard showing saved searches, campaign status, matches, reply rates, and win rates."
+      height={1228}
+      src="/landing/dashboards/03_bidwork_campaigns_dashboard.png"
+      width={2560}
+    />
+  );
 }
 
 function ProposalTemplates() {
-  const templates = [["Full Service Proposal", "Comprehensive proposal for end-to-end projects.", "12 sections", "80"], ["Consulting Proposal", "Ideal for strategy and consulting engagements.", "10 sections", "64"], ["Project Proposal", "Perfect for fixed-scope project work.", "9 sections", "103"], ["Retainer Proposal", "Ongoing support and retainer agreements.", "7 sections", "41"], ["Web Development", "For websites, platforms, and web apps.", "11 sections", "78"], ["SEO Proposal", "For SEO audits, strategy, and monthly retainers.", "8 sections", "53"]];
-  return <div className="landing-mini-app landing-template-app"><div className="landing-mini-app-top"><Brand /><div className="landing-search"><Search size={13} />Search templates...</div><Avatar initials="OC" tone="sand" /></div><div className="landing-mini-app-body"><div className="landing-mini-app-side"><span>Dashboard</span><span>Matched Jobs</span><span className="is-active">Proposals</span><span>Campaigns</span><span>Messages</span><span>Analytics</span><span>Settings</span></div><div className="landing-mini-app-content"><div className="landing-mini-title"><div><h4>Proposal Templates</h4><p>Create high-converting proposals faster with proven templates.</p></div><button type="button"><Plus size={13} />New Template</button></div><div className="landing-template-tabs"><span className="is-active">All Templates</span><span>General</span><span>Marketing</span><span>Development</span><span>Design</span><span>Writing</span></div><div className="landing-template-grid">{templates.map(([title, copy, sections, used]) => <div className="landing-template-card" key={title}><div className="landing-template-icon"><FileText size={16} /></div><strong>{title}</strong><p>{copy}</p><small><span>{sections}</span><span>Used {used} times</span></small></div>)}</div><div className="landing-ai-callout"><Sparkles size={17} /><span><strong>Personalize with AI</strong><small>Auto-tailor templates to each opportunity using client details, requirements, and past work.</small></span><button type="button">Create Draft</button></div></div></div></div>;
+  return (
+    <DashboardShot
+      alt="BidWork proposal templates dashboard showing reusable proposal categories and AI personalization."
+      height={1225}
+      src="/landing/dashboards/04_bidwork_proposal_templates_dashboard.png"
+      width={2560}
+    />
+  );
 }
 
 function CampaignsSection() {
@@ -122,13 +176,25 @@ function CampaignsSection() {
 }
 
 function NotificationPanel() {
-  const events = ["New qualified job match", "Approval requested", "Proposal status updates", "Connect balance low", "Boost performance alert"];
-  return <div className="landing-settings-app"><div className="landing-settings-side"><span className="is-active"><Bell size={14} />Notifications</span><span><Settings2 size={14} />Channels</span><span><Mail size={14} />Digest Settings</span><span><Moon size={14} />Quiet Hours</span><span><Filter size={14} />Rules</span><span><Clock3 size={14} />History</span></div><div className="landing-settings-main"><div className="landing-settings-header"><h4>Notification Preferences</h4><button type="button">Save Changes</button></div><p>Choose what you want to be notified about and where.</p><div className="landing-settings-table"><div className="settings-row settings-heading"><span>Event</span><span>In-App</span><span>Email</span><span>Slack</span><span>Discord</span></div>{events.map((event, index) => <div className="settings-row" key={event}><span><strong>{event}</strong><small>{index === 0 ? "When a job matches your filters" : "Stay in the loop when it matters"}</small></span>{[0, 1, 2, 3].map((item) => <i className={item === 3 && index === 1 ? "is-off" : "is-on"} key={item}><Check size={10} /></i>)}</div>)}</div><div className="landing-channel-row"><span><Mail size={15} />Email <b>Connected</b></span><span><MessageCircle size={15} />In-App <b>Enabled</b></span><span><Bell size={15} />Alerts <b>Connected</b></span></div></div></div>;
+  return (
+    <DashboardShot
+      alt="BidWork notification preferences dashboard showing in-app, email, Slack, and Discord alert controls."
+      height={1227}
+      src="/landing/dashboards/05_bidwork_notifications_dashboard.png"
+      width={2560}
+    />
+  );
 }
 
 function ReviewPanel() {
-  const jobs = ["Website Developer for SaaS Platform", "UX/UI Designer for Fintech Dashboard", "Technical SEO Audit & Strategy", "Social Media Marketing for DTC Brand"];
-  return <div className="landing-review-app"><div className="landing-review-list"><div className="landing-review-header"><strong>Review Queue</strong><span>12</span></div><div className="landing-review-tabs"><b>All <i>12</i></b><span>Needs Review <i>5</i></span><span>Scheduled <i>4</i></span><span>Sent <i>3</i></span></div>{jobs.map((job, index) => <div className={`landing-review-job ${index === 0 ? "is-selected" : ""}`} key={job}><span className="landing-job-logo">{index === 0 ? "M" : index === 1 ? "O" : index === 2 ? "S" : "N"}</span><span><strong>{job}</strong><small>{index % 2 === 0 ? "Microsoft" : "Stripe"} · {index === 0 ? "High" : "Medium"} match</small><small>Review by {index === 0 ? "you" : "Emma"}</small></span><small>Due in {index + 2}h</small></div>)}</div><div className="landing-review-editor"><div className="landing-editor-header"><strong>Proposal Preview</strong><span>High Match</span></div><div className="landing-editor-tabs"><b>Proposal</b><span>Cover Letter</span><span>Attachments</span></div><div className="landing-editor-body"><p>Hi Microsoft team,</p><p>We&apos;re excited to help build a scalable, high-performance SaaS platform that supports your growth.</p><ul><li>8+ years building SaaS applications</li><li>React, Node.js, and cloud-native architecture</li><li>Focused on performance, scalability, and clean code</li></ul><p>We&apos;d love to learn about your goals and share how we can help.</p><p>Best regards,<br />BidWork Agency</p></div></div><div className="landing-review-actions"><strong>Actions</strong><button type="button">Approve &amp; Send <Send size={13} /></button><button type="button">Approve &amp; Schedule</button><button type="button">Request Changes</button><button className="danger" type="button">Reject Proposal</button><div className="landing-action-group"><strong>Schedule</strong><span><CircleDot size={10} /> Send Now</span><span><Circle size={10} /> Schedule for Later</span><small>May 28, 2025 · 10:00 AM</small></div><div className="landing-action-group"><strong>Boost Strategy</strong><span className="landing-recommended">Recommended</span><small>High Boost · +25% more visibility</small></div></div></div>;
+  return (
+    <DashboardShot
+      alt="BidWork bid-control dashboard showing the review queue, proposal editor, approval actions, scheduling, and boost strategy."
+      height={1067}
+      src="/landing/dashboards/06_bidwork_bid_control_dashboard.png"
+      width={2560}
+    />
+  );
 }
 
 function ControlSection() {
@@ -136,12 +202,25 @@ function ControlSection() {
 }
 
 function AnalyticsPanel() {
-  return <div className="landing-analytics-app"><div className="landing-analytics-top"><Brand /><span>Analytics Overview</span><button type="button">May 1 – May 31, 2025 <ChevronDown size={12} /></button></div><div className="landing-analytics-body"><div className="landing-mini-app-side"><span>Dashboard</span><span>Matched Jobs</span><span>Proposals</span><span>Campaigns</span><span>Messages</span><span className="is-active">Analytics</span><span>Settings</span></div><div className="landing-analytics-content"><div className="landing-analytics-metrics"><span><small>Open Rate</small><strong>60%</strong><b>↑ 12.4%</b></span><span><small>Reply Rate</small><strong>21.8%</strong><b>↑ 8.7%</b></span><span><small>Win Rate</small><strong>12.5%</strong><b>↑ 3.1%</b></span><span><small>Meetings Booked</small><strong>48</strong><b>↑ 20.0%</b></span></div><div className="landing-chart-card"><div className="landing-chart-heading"><strong>Performance Over Time</strong><span>● Open Rate　● Reply Rate　● Win Rate</span></div><div className="landing-chart"><i className="chart-line chart-line-teal" /><i className="chart-line chart-line-blue" /><i className="chart-line chart-line-orange" /><div className="chart-grid"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div></div></div><div className="landing-analytics-bottom"><div className="landing-chart-card"><strong>Top Niches by Win Rate</strong>{[["Digital Marketing", "18.7%"], ["Web Development", "15.3%"], ["E-commerce", "14.8%"], ["UX/UI Design", "13.2%"], ["Automation", "11.9%"]].map(([label, value], index) => <div className="landing-niche-row" key={label}><span>{label}</span><i><b style={{ width: `${96 - index * 13}%` }} /></i><strong>{value}</strong></div>)}</div><div className="landing-analytics-table"><strong>Campaign Performance</strong><div className="landing-table-line landing-table-line-head"><span>Campaign</span><span>Sent</span><span>Opened</span><span>Replied</span><span>Win Rate</span></div>{["Web Dev – US", "Digital Marketing – Global", "UX/UI Design – UK"].map((row, index) => <div className="landing-table-line" key={row}><span>{row}</span><span>{["1,328", "1,102", "856"][index]}</span><span>{["812", "661", "498"][index]}</span><span>{["214", "132", "93"][index]}</span><span>{["10.0%", "10.6%", "10.8%"][index]}</span></div>)}</div></div></div></div></div>;
+  return (
+    <DashboardShot
+      alt="BidWork analytics dashboard showing open, reply, and win rates, meetings booked, trends, niches, and campaign performance."
+      height={1205}
+      src="/landing/dashboards/07_bidwork_analytics_dashboard.png"
+      width={2560}
+    />
+  );
 }
 
 function AcademyPanel() {
-  const paths = [["Get Started", "5 lessons", "60% complete", "teal"], ["Profile & Positioning", "6 lessons", "40% complete", "blue"], ["Outreach & Messaging", "7 lessons", "20% complete", "orange"], ["Proposals That Win", "6 lessons", "0% complete", "violet"]] as const;
-  return <div className="landing-academy-app"><div className="landing-analytics-top"><Brand /><span>Academy</span><div className="landing-search"><Search size={13} />Search lessons, guides, and topics...</div></div><div className="landing-academy-body"><div className="landing-mini-app-side"><span>Dashboard</span><span>Matched Jobs</span><span>Proposals</span><span>Campaigns</span><span>Messages</span><span>Analytics</span><span className="is-active">Academy</span><span>Settings</span></div><div className="landing-academy-content"><div className="landing-academy-heading"><div><h4>Learning Paths</h4><p>Learn, apply, and win more with BidWork.</p></div><a href="#footer">View all paths <ArrowRight size={13} /></a></div><div className="landing-path-grid">{paths.map(([title, lessons, completion, tone]) => <div className={`landing-path-card landing-path-${tone}`} key={title}><div><strong>{title}</strong><small>{lessons}</small></div><span>{completion}</span><i><b style={{ width: completion.split("%")[0] + "%" }} /></i></div>)}</div><div className="landing-academy-lower"><div><strong>Recommended for You</strong>{["Complete Your Profile for More Replies", "The 5-Message Outreach Sequence That Gets Replies", "Proposal Framework That Converts"].map((item, index) => <div className="landing-lesson-row" key={item}><span><BookOpen size={13} /></span><strong>{item}<small>Guide · {index + 8} min read</small></strong><em>{index === 0 ? "In progress" : "Not started"}</em></div>)}</div><div className="landing-daily-check"><strong>Daily Checklist</strong>{["Send 10 new messages", "Follow up with 5 prospects", "Review 3 new matches", "Analyze yesterday’s performance"].map((item, index) => <span key={item}><i className={index === 3 ? "" : "done"}>{index === 3 ? "" : "✓"}</i>{item}<small>{index === 0 ? "10 / 10" : index === 1 ? "6 / 5" : index === 2 ? "3 / 3" : "0 / 1"}</small></span>)}</div></div></div></div></div>;
+  return (
+    <DashboardShot
+      alt="BidWork Academy dashboard showing learning paths, recommended lessons, daily checklist, and progress."
+      height={1180}
+      src="/landing/dashboards/08_bidwork_academy_dashboard.png"
+      width={2560}
+    />
+  );
 }
 
 function AnalyticsSection() {

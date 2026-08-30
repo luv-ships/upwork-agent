@@ -17,7 +17,7 @@ a { color: inherit; text-decoration: none; }
 .landing-header { position: sticky; top: 0; z-index: 30; border-bottom: 1px solid #e5eaf0; background: rgba(255,255,255,.96); backdrop-filter: blur(14px); }
 .landing-header-inner { display: flex; min-height: 78px; align-items: center; gap: 32px; }
 .landing-brand { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; font-size: 23px; font-weight: 750; letter-spacing: -.035em; color: #111827; }
-.landing-brand-mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; background: var(--orange); color: #fff; }
+.landing-brand-image { display: block; width: 38px; height: 31px; flex: 0 0 auto; object-fit: contain; }
 .landing-brand-dot { color: #111827; font-size: .7em; font-weight: 600; }
 .landing-nav { display: flex; flex: 1; justify-content: center; gap: 40px; color: #202b3b; font-size: 15px; }
 .landing-nav a, .landing-footer-bottom nav a { transition: color 160ms ease; }
@@ -64,6 +64,9 @@ a { color: inherit; text-decoration: none; }
 .landing-avatar-sand { background: #f2dfb9; }
 .landing-avatar-blue { background: #c8ddf5; }
 .landing-avatar-rose { background: #f4cbd1; }
+.landing-dashboard-shot { width: 100%; min-width: 0; margin: 0; overflow: hidden; border: 1px solid #dfe7eb; border-radius: 15px; background: #fff; box-shadow: 0 16px 38px rgba(31,64,84,.08); }
+.landing-dashboard-shot-image { display: block; width: 100%; height: auto; max-width: none; object-fit: contain; image-rendering: auto; }
+.landing-dashboard-shot-hero { border-radius: 20px; box-shadow: 0 22px 60px rgba(28,52,73,.13); }
 .landing-dashboard { display: grid; grid-template-columns: 165px minmax(0, 1fr); min-height: 590px; overflow: hidden; border: 1px solid #dce5eb; border-radius: 20px; background: #fff; box-shadow: 0 22px 60px rgba(28, 52, 73, .12); }
 .landing-dashboard-sidebar { display: flex; flex-direction: column; border-right: 1px solid #e5ebef; padding: 25px 13px 17px; background: #fbfdfd; }
 .landing-dashboard-sidebar .landing-brand { margin: 0 8px 34px; font-size: 14px; gap: 6px; }
@@ -164,6 +167,7 @@ a { color: inherit; text-decoration: none; }
 .landing-join-line svg { color: var(--orange); }
 .landing-join-line strong { color: var(--orange); }
 .landing-feature-card { display: grid; grid-template-columns: minmax(280px, .48fr) minmax(0, 1.52fr); gap: 44px; border: 1px solid #dfe7eb; border-radius: 21px; padding: 31px; background: #fff; box-shadow: 0 16px 40px rgba(31,64,84,.06); }
+.landing-feature-card > .landing-dashboard-shot { align-self: center; }
 .landing-feature-copy { padding: 17px 5px; }
 .landing-icon-badge { display: inline-grid; width: 48px; height: 48px; place-items: center; border: 1px solid #cfece7; border-radius: 15px; color: var(--teal); background: #effbf9; }
 .landing-icon-badge-blue { border-color: #d0e3fb; color: var(--blue); background: #eff6ff; }
@@ -229,6 +233,7 @@ a { color: inherit; text-decoration: none; }
 .landing-band-card + .landing-band-card { margin-top: 15px; }
 .landing-band-card-reverse { grid-template-columns: minmax(0, 1.3fr) minmax(300px, .7fr); }
 .landing-band-card-reverse .landing-feature-copy { grid-column: 2; grid-row: 1; }
+.landing-band-card-reverse > .landing-dashboard-shot,
 .landing-band-card-reverse > .landing-mini-app { grid-column: 1; grid-row: 1; }
 .landing-band-card .landing-feature-copy h3 { font-size: 31px; }
 .landing-color-teal { color: var(--teal); }
@@ -476,7 +481,7 @@ a { color: inherit; text-decoration: none; }
   .landing-profile-grid, .landing-story-grid { grid-template-columns: repeat(2, 1fr); }
   .landing-profile-card:last-child { grid-column: span 2; }
   .landing-feature-card, .landing-band-card, .landing-band-card-reverse, .landing-control-card-reverse { grid-template-columns: 1fr; }
-  .landing-band-card-reverse .landing-feature-copy, .landing-band-card-reverse > .landing-mini-app { grid-column: auto; grid-row: auto; }
+  .landing-band-card-reverse .landing-feature-copy, .landing-band-card-reverse > .landing-dashboard-shot, .landing-band-card-reverse > .landing-mini-app { grid-column: auto; grid-row: auto; }
   .landing-match-grid { grid-template-columns: 1fr 1fr; }
   .landing-positive-panel { grid-column: span 2; }
   .landing-review-app { grid-template-columns: 1fr 1fr; }
@@ -492,7 +497,7 @@ a { color: inherit; text-decoration: none; }
   .landing-container { width: min(100% - 28px, 560px); }
   .landing-header-inner { min-height: 65px; }
   .landing-brand { font-size: 19px; }
-  .landing-brand-mark { width: 30px; height: 30px; }
+  .landing-brand-image { width: 34px; height: 28px; }
   .landing-nav { display: none; }
   .landing-header-actions { margin-left: auto; }
   .landing-button-small { min-height: 38px; padding: 0 12px; font-size: 12px; }
