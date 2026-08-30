@@ -1,162 +1,173 @@
-import Image from "next/image";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BarChart3,
+  Bell,
+  BookOpen,
+  BriefcaseBusiness,
+  CalendarDays,
+  Check,
+  Circle,
+  CircleDot,
+  ChevronDown,
+  ChevronRight,
+  Clock3,
+  Code2,
+  FileText,
+  Filter,
+  Gauge,
+  GraduationCap,
+  Infinity as InfinityIcon,
+  Eye,
+  LayoutDashboard,
+  LineChart,
+  Mail,
+  MessageCircle,
+  Moon,
+  Plus,
+  Search,
+  Send,
+  Settings2,
+  ShieldCheck,
+  Sparkles,
+  Star,
+  Sun,
+  Target,
+  ThumbsUp,
+  TrendingUp,
+  Trophy,
+  Users,
+  Zap
+} from "lucide-react";
 import Link from "next/link";
-
-import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 
 export const dynamic = "force-static";
 
-type Hotspot = {
-  href: string;
-  label: string;
-  className: string;
-};
+const signInHref = "/sign-in?next=%2Fapp%2Fcampaigns%2Fnew";
+type Icon = LucideIcon;
 
-const imageWidth = 1672;
-const imageHeight = 941;
-
-const sections = [
-  {
-    id: "proof",
-    src: "/landing/trust.png",
-    alt: "BidWork is trusted by high-performing freelancers and lean agencies."
-  },
-  {
-    id: "features",
-    src: "/landing/matching.png",
-    alt: "Smart matching feature overview with fit score, client-quality signals, screening checks, and custom campaign rules."
-  },
-  {
-    id: "campaigns",
-    src: "/landing/campaigns-proposals.png",
-    alt: "BidWork outreach features showing unlimited campaigns and proposal drafts."
-  },
-  {
-    id: "control",
-    src: "/landing/control.png",
-    alt: "BidWork control features showing real-time notifications and complete bid control."
-  },
-  {
-    id: "analytics",
-    src: "/landing/analytics-academy.png",
-    alt: "BidWork analytics and academy tools for improving outreach performance."
-  },
-  {
-    id: "comparison",
-    src: "/landing/comparison.png",
-    alt: "Comparison of a manual Upwork process with the faster, more consistent BidWork workflow."
-  },
-  {
-    id: "stories",
-    src: "/landing/stories.png",
-    alt: "Customer stories from teams that switched to BidWork."
-  },
-  {
-    id: "faq",
-    src: "/landing/footer.png",
-    alt: "BidWork closing call to action and footer navigation."
-  }
-] as const;
-
-function Hotspot({ href, label, className }: Hotspot) {
+function Brand() {
   return (
-    <Link
-      aria-label={label}
-      className={`landing-hotspot ${className}`}
-      href={href}
-    />
+    <Link className="landing-brand" href="/" aria-label="BidWork.app home">
+      <span className="landing-brand-mark" aria-hidden="true"><Sun size={22} strokeWidth={2.6} /></span>
+      <span>BidWork<span className="landing-brand-dot">.app</span></span>
+    </Link>
   );
 }
 
-function LandingImage({
-  src,
-  alt,
-  priority = false
-}: {
-  src: string;
-  alt: string;
-  priority?: boolean;
-}) {
-  return (
-    <Image
-      alt={alt}
-      className="landing-art"
-      height={imageHeight}
-      priority={priority}
-      quality={96}
-      sizes="(max-width: 1672px) 100vw, 1672px"
-      src={src}
-      width={imageWidth}
-    />
-  );
+function IconBadge({ icon: Icon, tone = "teal" }: { icon: Icon; tone?: "teal" | "blue" | "orange" | "violet" }) {
+  return <span className={`landing-icon-badge landing-icon-badge-${tone}`}><Icon size={22} strokeWidth={1.9} aria-hidden="true" /></span>;
 }
 
-function HiddenContent({ children }: { children: ReactNode }) {
-  return <div className="sr-only">{children}</div>;
+function CheckList({ items, tone = "teal" }: { items: string[]; tone?: "teal" | "blue" | "orange" }) {
+  return <ul className={`landing-check-list landing-check-list-${tone}`}>{items.map((item) => <li key={item}><Check size={16} strokeWidth={2.5} aria-hidden="true" /><span>{item}</span></li>)}</ul>;
+}
+
+function SectionIntro({ eyebrow, icon: Icon, title, emphasis, description }: { eyebrow: string; icon: Icon; title: string; emphasis?: string; description: string }) {
+  return <div className="landing-section-intro"><div className="landing-eyebrow"><Icon size={16} aria-hidden="true" />{eyebrow}</div><h2>{title} {emphasis ? <span className="landing-emphasis">{emphasis}</span> : null}</h2><p>{description}</p></div>;
+}
+
+function Avatar({ initials, tone }: { initials: string; tone: "peach" | "lilac" | "mint" | "sand" | "blue" | "rose" }) {
+  return <span aria-hidden="true" className={`landing-avatar landing-avatar-${tone}`}>{initials}</span>;
+}
+
+function StarRow() {
+  return <span className="landing-stars" aria-label="5 out of 5 stars">{[1, 2, 3, 4, 5].map((star) => <Star key={star} size={15} fill="currentColor" strokeWidth={0} />)}</span>;
+}
+
+function Header() {
+  return <header className="landing-header"><div className="landing-container landing-header-inner"><Brand /><nav aria-label="Primary navigation" className="landing-nav"><a href="#product">Product</a><a href="#features">Features</a><a href="#campaigns">Pricing</a><a href="#proof">Proof</a><a href="#footer">FAQ</a></nav><div className="landing-header-actions"><button type="button" aria-label="Light mode" className="landing-icon-button"><Sun size={19} /></button><button type="button" aria-label="Dark mode" className="landing-icon-button"><Moon size={18} /></button><Link className="landing-button landing-button-outline landing-button-small" href="/sign-in">Log in</Link><Link className="landing-button landing-button-primary landing-button-small" href={signInHref}>Start Free <ArrowRight size={16} /></Link></div></div></header>;
+}
+
+function MetricCard({ label, value, note, icon: Icon, tone }: { label: string; value: string; note: string; icon: Icon; tone: "teal" | "blue" | "orange" }) {
+  return <div className="landing-metric-card"><div><p>{label}</p><strong>{value}</strong><small>{note}</small></div><span className={`landing-metric-icon landing-metric-icon-${tone}`}><Icon size={18} /></span></div>;
+}
+
+function HeroDashboard() {
+  const jobs = [["Webflow Developer for SaaS Landing Page", "96", "$2,000", "15m ago"], ["UX/UI Designer for Fintech Dashboard", "93", "$1,800", "28m ago"], ["Technical SEO Audit & Strategy", "91", "$1,200", "42m ago"], ["Shopify Developer for Store Redesign", "88", "$1,500", "1h ago"], ["GoHighLevel CRM Automation Expert", "87", "$1,000", "1h ago"]];
+  return <div className="landing-dashboard" aria-label="BidWork dashboard preview"><aside className="landing-dashboard-sidebar"><Brand /><div className="landing-dashboard-nav"><span className="is-active"><LayoutDashboard size={14} />Dashboard</span><span><BriefcaseBusiness size={14} />Matched Jobs</span><span><FileText size={14} />Proposals</span><span><Send size={14} />Campaigns</span><span><MessageCircle size={14} />Messages</span><span><BarChart3 size={14} />Analytics</span><span><Settings2 size={14} />Settings</span></div><div className="landing-plan-card"><strong>Pro Plan · 5 seats</strong><span>Manage plan</span></div><div className="landing-user-row"><Avatar initials="OC" tone="sand" /><div><strong>Olivia Carter</strong><small>Agency Owner</small></div><ChevronDown size={14} /></div></aside><div className="landing-dashboard-main"><div className="landing-dashboard-heading"><div><h3>Dashboard</h3><p>Your AI-driven overview.</p></div><div className="landing-dashboard-toolbar"><span>Auto-pilot <i className="landing-switch" /></span><Bell size={16} /><button type="button">All categories <ChevronDown size={13} /></button></div></div><div className="landing-metric-grid"><MetricCard label="Matched Today" value="48" note="High-fit opportunities" icon={BriefcaseBusiness} tone="teal" /><MetricCard label="Proposals Sent" value="27" note="Manual & Autopilot" icon={Send} tone="blue" /><MetricCard label="Replies" value="14" note="51.9% reply rate" icon={MessageCircle} tone="teal" /><MetricCard label="Won" value="5" note="18.5% win rate" icon={Trophy} tone="orange" /></div><div className="landing-dashboard-columns"><div className="landing-panel landing-job-panel"><div className="landing-panel-heading"><strong>Top Matched Jobs</strong><a href="#features">View all</a></div><div className="landing-job-list">{jobs.map(([title, score, budget, age]) => <div className="landing-job-row" key={title}><span className="landing-score-ring">{score}</span><div><strong>{title}</strong><small>{budget} · Fixed Price · Posted {age}</small></div><ChevronRight size={15} /></div>)}</div><a className="landing-panel-link" href="#features">View all matched jobs <ArrowRight size={14} /></a></div><div className="landing-panel landing-proposal-panel"><div className="landing-panel-heading"><strong>Proposal Preview</strong><a href="#campaigns">Edit</a></div><p>Hi James,</p><p>I delivered a clear plan for your high-converting landing page and would love to help bring it to life.</p><CheckList items={["Pixel-perfect responsive build", "Performance optimized", "Easy-to-manage CMS", "On-time delivery"]} /><div className="landing-proposal-footer"><small>Estimated timeline: 5–7 days</small><button type="button">Use Proposal</button></div></div><div className="landing-panel landing-quality-panel"><div className="landing-panel-heading"><strong>Client Quality</strong><a href="#proof">Why it matters</a></div><div className="landing-quality-score"><span className="landing-score-ring landing-score-ring-large">95<small>/100</small></span><span><strong>Great Fit</strong><small>Excellent client signals</small></span></div><CheckList items={["Payment method verified", "$20K+ total spent", "95%+ hire rate", "Active in last 2 days"]} /><a className="landing-panel-link" href="#proof">View client profile <ArrowRight size={14} /></a></div></div></div></div>;
+}
+
+function Hero() {
+  return <section className="landing-hero" id="product"><div className="landing-container landing-hero-grid"><div className="landing-hero-copy"><div className="landing-eyebrow landing-eyebrow-blue"><Sparkles size={16} />AI Upwork Assistant for Freelancers &amp; Agencies</div><h1>Win better Upwork jobs without <span className="landing-emphasis landing-emphasis-hero">chasing</span> the feed.</h1><p>BidWork monitors Upwork 24/7, scores every opportunity for fit, drafts tailored proposals, and helps you bid faster—while you stay in control.</p><div className="landing-pill-row"><span><Users size={16} />Freelancers</span><span><BriefcaseBusiness size={16} />Agencies</span><span><ShieldCheck size={16} />Manual approval</span><span><Zap size={16} />Autopilot</span></div><div className="landing-cta-row"><Link className="landing-button landing-button-primary" href={signInHref}>Start Free <ArrowRight size={18} /></Link><a className="landing-button landing-button-outline" href="mailto:luvautomates@gmail.com?subject=BidWork%20demo">Book a Demo <CalendarDays size={18} /></a></div><div className="landing-reassurance"><span><Check size={15} />No credit card</span><span><Check size={15} />Setup in 2 minutes</span><span><Check size={15} />Cancel anytime</span></div><div className="landing-social-proof"><div className="landing-avatar-stack"><Avatar initials="LM" tone="peach" /><Avatar initials="SK" tone="lilac" /><Avatar initials="DR" tone="mint" /><Avatar initials="AP" tone="sand" /></div><div><StarRow /><span>Trusted by 1,200+ Upwork pros</span></div></div></div><HeroDashboard /></div><div className="landing-container landing-proof-strip"><div><Mail size={20} /><strong>60% open rate</strong><span>Industry-leading outreach</span></div><div><MessageCircle size={20} /><strong>21.8% reply rate</strong><span>More replies, better conversations</span></div><div><Trophy size={20} /><strong>12.5% win rate</strong><span>Win more of the right jobs</span></div></div></section>;
+}
+
+const trustedProfiles = [["Lucas M.", "Upwork Consultant & Proposal Strategist", "United States", "100%", "$730K+", "$125/hr", "LM", "peach"], ["Sophie K.", "Brand & Web Designer", "Canada", "100%", "$510K+", "$75/hr", "SK", "lilac"], ["David R.", "Full Stack Developer", "Germany", "99%", "$1.2M+", "$95/hr", "DR", "mint"], ["Anaya P.", "Automation & AI Specialist", "India", "100%", "$600K+", "$80/hr", "AP", "sand"], ["Michael T.", "Digital Marketing Strategist", "United Kingdom", "98%", "$450K+", "$65/hr", "MT", "blue"], ["Isabella N.", "UX/UI Designer", "Italy", "100%", "$320K+", "$60/hr", "IN", "rose"], ["Mark C.", "Data Engineer", "Philippines", "100%", "$390K+", "$70/hr", "MC", "mint"], ["Emma L.", "Business Consultant", "Australia", "100%", "$680K+", "$110/hr", "EL", "sand"], ["Arjun S.", "HubSpot & CRM Automation", "United States", "99%", "$290K+", "$55/hr", "AS", "peach"], ["Natalie B.", "Content Writer", "New Zealand", "100%", "$210K+", "$45/hr", "NB", "lilac"]] as const;
+
+function TrustSection() {
+  return <section className="landing-section landing-trust-section" id="proof"><div className="landing-container"><SectionIntro eyebrow="Trusted by Top Upwork Professionals" icon={Star} title="Trusted by high-performing freelancers and lean agencies" description="BidWork is used by serious Upwork professionals across consulting, design, development, automation, and marketing to respond faster and win more qualified work." /><div className="landing-profile-grid">{trustedProfiles.map(([name, role, location, success, earned, rate, initials, tone]) => <article className="landing-profile-card" key={name}><div className="landing-reply-badge"><span />Reply rate {name === "David R." ? "24.7" : name === "Anaya P." ? "17.6" : "21.3"}%</div><div className="landing-profile-head"><Avatar initials={initials} tone={tone} /><div><h3>{name}</h3><p>{role}</p><span><Target size={13} />{location}</span></div></div><div className="landing-profile-meta"><span><ThumbsUp size={15} />{success} Job Success</span><strong>{earned}<small>earned</small></strong></div><strong className="landing-rate">{rate}</strong></article>)}</div><p className="landing-join-line"><Star size={17} fill="#f58b12" strokeWidth={0} /> Join <strong>2,000+</strong> top freelancers and agencies winning more on Upwork with BidWork.</p></div></section>;
+}
+
+function MatchDetail() {
+  return <div className="landing-match-detail"><div className="landing-match-top"><div><a href="#features"><ArrowLeft size={12} /> Back to Matched Jobs</a><h3>Senior Webflow Developer for SaaS Landing Page</h3><div className="landing-tag-row"><span>High Match</span><span>New</span><small>Posted 2 hours ago · Fixed Price · $2,000 · Expert Level</small></div></div><div className="landing-fit-score"><span className="landing-score-ring landing-score-ring-xl">96</span><div><strong>Excellent Match</strong><small>Top 5% of jobs</small></div></div></div><div className="landing-match-grid"><div><div className="landing-mini-panel"><strong>Job Summary</strong><p>We need a Webflow expert to build a high-converting landing page for our new SaaS product launch.</p><a href="#features">More details <ArrowRight size={13} /></a></div><div className="landing-mini-panel"><strong>Skills &amp; Expertise</strong><div className="landing-chip-row"><span>Webflow</span><span>Figma</span><span>Landing Page Design</span><span>CMS</span><span>GSAP</span></div><div className="landing-mini-stats"><span><small>Project Type</small>One-time project</span><span><small>Project Length</small>1 to 3 months</span></div></div></div><div className="landing-mini-panel landing-screening-panel"><div className="landing-panel-heading"><strong>Screening Questions</strong><span className="landing-good-fit">Good Fit</span></div>{["Have you built landing pages in Webflow?", "Can you integrate with third-party tools?", "Share a recent landing page you built."].map((question) => <div className="landing-question" key={question}><strong>Q: {question}</strong><span>Your answer: <b>{question.startsWith("Share") ? "Provided" : "Yes"}</b> <Check size={12} /></span></div>)}<div className="landing-progress"><span>4 of 4 answered</span><i><b /></i></div></div><div className="landing-mini-panel landing-positive-panel"><strong>Positive Signals</strong><CheckList items={["Payment method verified", "$50K+ total spent", "95%+ hire rate", "12+ jobs posted", "Long-term client (2+ years)"]} /><div className="landing-watch"><strong>Watch Out For</strong><span>Project scope is broad</span><span>Tight 2-week deadline</span></div></div></div><div className="landing-match-bottom"><span><strong>AC</strong><b>Acme SaaS Inc.</b><small><StarRow />4.9 (128 reviews) · United States</small></span><span><strong>18</strong><small>Previous projects</small></span><span><strong>Posted 2 hours ago</strong><small>4 proposals so far</small></span></div></div>;
+}
+
+function MatchingSection() {
+  return <section className="landing-section" id="features"><div className="landing-container"><SectionIntro eyebrow="Smart Matching" icon={Sparkles} title="Find the jobs" emphasis="worth" description="BidWork goes beyond keyword filters. Our AI scores each job using client quality, budget, hiring behavior, screening questions, role fit, and your own rules—so you focus on the best opportunities." /><div className="landing-feature-card landing-matching-card"><div className="landing-feature-copy"><IconBadge icon={Target} /><h3>Smarter matches, better outcomes</h3><p>BidWork’s AI evaluates every posting across multiple signals to surface the best-fit jobs and save you hours of manual screening.</p><div className="landing-feature-list"><div><IconBadge icon={LineChart} /><span><strong>Fit score</strong><small>Instant score showing how well a job matches your profile</small></span></div><div><IconBadge icon={Users} /><span><strong>Client-quality signals</strong><small>History, spend, reviews, payment verification, and more</small></span></div><div><IconBadge icon={Filter} /><span><strong>Screening-question checks</strong><small>Pre-qualify jobs based on your must-have answers</small></span></div><div><IconBadge icon={Settings2} /><span><strong>Custom campaign rules</strong><small>Your rules, your way—automatically applied</small></span></div></div><a className="landing-button landing-button-outline" href="#campaigns">See sample match <ArrowRight size={16} /></a></div><MatchDetail /></div></div></section>;
+}
+
+function MiniCampaignTable() {
+  const rows = [["SaaS Marketing – US", "Active", "312", "28", "21.3%", "13.2%"], ["E-commerce – UK & AU", "Active", "186", "17", "19.4%", "11.8%"], ["Fintech – Enterprise", "Active", "142", "12", "24.8%", "14.7%"], ["Healthcare – North America", "Draft", "98", "6", "18.9%", "9.4%"], ["B2B SaaS – Seed to Series B", "Paused", "76", "4", "16.2%", "8.1%"]];
+  return <div className="landing-mini-app"><div className="landing-mini-app-top"><Brand /><div className="landing-search"><Search size={13} />Search campaigns...</div><Bell size={14} /><Avatar initials="OC" tone="sand" /></div><div className="landing-mini-app-body"><div className="landing-mini-app-side"><span>Dashboard</span><span>Matched Jobs</span><span>Proposals</span><span className="is-active">Campaigns</span><span>Messages</span><span>Analytics</span><span>Settings</span></div><div className="landing-mini-app-content"><div className="landing-mini-title"><div><h4>Campaigns</h4><p>Find and track opportunities that match your ideal client profile.</p></div><button type="button"><Plus size={13} />New Campaign</button></div><div className="landing-table-filters"><span>All Status <ChevronDown size={11} /></span><span>All Countries <ChevronDown size={11} /></span><span>All Niches <ChevronDown size={11} /></span><span>All Budgets <ChevronDown size={11} /></span></div><table><thead><tr><th>Name</th><th>Status</th><th>Matches</th><th>New (7d)</th><th>Reply Rate</th><th>Win Rate</th></tr></thead><tbody>{rows.map((row) => <tr key={row[0]}>{row.map((cell, index) => <td key={`${row[0]}-${cell}`}>{index === 1 ? <span className={`landing-status landing-status-${cell.toLowerCase()}`}><i />{cell}</span> : cell}</td>)}</tr>)}</tbody></table></div></div></div>;
+}
+
+function ProposalTemplates() {
+  const templates = [["Full Service Proposal", "Comprehensive proposal for end-to-end projects.", "12 sections", "80"], ["Consulting Proposal", "Ideal for strategy and consulting engagements.", "10 sections", "64"], ["Project Proposal", "Perfect for fixed-scope project work.", "9 sections", "103"], ["Retainer Proposal", "Ongoing support and retainer agreements.", "7 sections", "41"], ["Web Development", "For websites, platforms, and web apps.", "11 sections", "78"], ["SEO Proposal", "For SEO audits, strategy, and monthly retainers.", "8 sections", "53"]];
+  return <div className="landing-mini-app landing-template-app"><div className="landing-mini-app-top"><Brand /><div className="landing-search"><Search size={13} />Search templates...</div><Avatar initials="OC" tone="sand" /></div><div className="landing-mini-app-body"><div className="landing-mini-app-side"><span>Dashboard</span><span>Matched Jobs</span><span className="is-active">Proposals</span><span>Campaigns</span><span>Messages</span><span>Analytics</span><span>Settings</span></div><div className="landing-mini-app-content"><div className="landing-mini-title"><div><h4>Proposal Templates</h4><p>Create high-converting proposals faster with proven templates.</p></div><button type="button"><Plus size={13} />New Template</button></div><div className="landing-template-tabs"><span className="is-active">All Templates</span><span>General</span><span>Marketing</span><span>Development</span><span>Design</span><span>Writing</span></div><div className="landing-template-grid">{templates.map(([title, copy, sections, used]) => <div className="landing-template-card" key={title}><div className="landing-template-icon"><FileText size={16} /></div><strong>{title}</strong><p>{copy}</p><small><span>{sections}</span><span>Used {used} times</span></small></div>)}</div><div className="landing-ai-callout"><Sparkles size={17} /><span><strong>Personalize with AI</strong><small>Auto-tailor templates to each opportunity using client details, requirements, and past work.</small></span><button type="button">Create Draft</button></div></div></div></div>;
+}
+
+function CampaignsSection() {
+  return <section className="landing-section landing-band-section" id="campaigns"><div className="landing-container"><div className="landing-band-heading"><span><span className="landing-dot landing-dot-teal" />Scale your outreach system</span></div><div className="landing-feature-card landing-band-card"><div className="landing-feature-copy"><IconBadge icon={InfinityIcon} /><h3><span className="landing-color-teal">Unlimited</span> Campaigns</h3><p>Create unlimited saved searches to find the right opportunities—across niches, countries, budgets, client-spend levels, hiring activity, and screening-question patterns.</p><CheckList items={["Define your perfect client profile with advanced filters", "Target by geography, budget, spend level, and hiring signals", "Use screening-question patterns to surface better fits", "Track performance and iterate to win more"]} /><a className="landing-button landing-button-outline" href="#control">Explore campaigns <ArrowRight size={16} /></a></div><MiniCampaignTable /></div><div className="landing-feature-card landing-band-card landing-band-card-reverse"><div className="landing-feature-copy"><IconBadge icon={FileText} tone="blue" /><h3><span className="landing-color-blue">Proposal</span> Drafts</h3><p>Turn your profile, templates, case studies, and Q&amp;A into personalized proposal drafts that speak directly to each opportunity—saving hours and helping you sound relevant, not generic.</p><CheckList items={["Leverage your templates, case studies, and past wins", "Auto-tailor to the client, project, and requirements", "Answer screening questions with your knowledge base", "Refine, export, and send with confidence"]} tone="blue" /><a className="landing-button landing-button-outline" href="#control">See templates <ArrowRight size={16} /></a></div><ProposalTemplates /></div></div></section>;
+}
+
+function NotificationPanel() {
+  const events = ["New qualified job match", "Approval requested", "Proposal status updates", "Connect balance low", "Boost performance alert"];
+  return <div className="landing-settings-app"><div className="landing-settings-side"><span className="is-active"><Bell size={14} />Notifications</span><span><Settings2 size={14} />Channels</span><span><Mail size={14} />Digest Settings</span><span><Moon size={14} />Quiet Hours</span><span><Filter size={14} />Rules</span><span><Clock3 size={14} />History</span></div><div className="landing-settings-main"><div className="landing-settings-header"><h4>Notification Preferences</h4><button type="button">Save Changes</button></div><p>Choose what you want to be notified about and where.</p><div className="landing-settings-table"><div className="settings-row settings-heading"><span>Event</span><span>In-App</span><span>Email</span><span>Slack</span><span>Discord</span></div>{events.map((event, index) => <div className="settings-row" key={event}><span><strong>{event}</strong><small>{index === 0 ? "When a job matches your filters" : "Stay in the loop when it matters"}</small></span>{[0, 1, 2, 3].map((item) => <i className={item === 3 && index === 1 ? "is-off" : "is-on"} key={item}><Check size={10} /></i>)}</div>)}</div><div className="landing-channel-row"><span><Mail size={15} />Email <b>Connected</b></span><span><MessageCircle size={15} />In-App <b>Enabled</b></span><span><Bell size={15} />Alerts <b>Connected</b></span></div></div></div>;
+}
+
+function ReviewPanel() {
+  const jobs = ["Website Developer for SaaS Platform", "UX/UI Designer for Fintech Dashboard", "Technical SEO Audit & Strategy", "Social Media Marketing for DTC Brand"];
+  return <div className="landing-review-app"><div className="landing-review-list"><div className="landing-review-header"><strong>Review Queue</strong><span>12</span></div><div className="landing-review-tabs"><b>All <i>12</i></b><span>Needs Review <i>5</i></span><span>Scheduled <i>4</i></span><span>Sent <i>3</i></span></div>{jobs.map((job, index) => <div className={`landing-review-job ${index === 0 ? "is-selected" : ""}`} key={job}><span className="landing-job-logo">{index === 0 ? "M" : index === 1 ? "O" : index === 2 ? "S" : "N"}</span><span><strong>{job}</strong><small>{index % 2 === 0 ? "Microsoft" : "Stripe"} · {index === 0 ? "High" : "Medium"} match</small><small>Review by {index === 0 ? "you" : "Emma"}</small></span><small>Due in {index + 2}h</small></div>)}</div><div className="landing-review-editor"><div className="landing-editor-header"><strong>Proposal Preview</strong><span>High Match</span></div><div className="landing-editor-tabs"><b>Proposal</b><span>Cover Letter</span><span>Attachments</span></div><div className="landing-editor-body"><p>Hi Microsoft team,</p><p>We&apos;re excited to help build a scalable, high-performance SaaS platform that supports your growth.</p><ul><li>8+ years building SaaS applications</li><li>React, Node.js, and cloud-native architecture</li><li>Focused on performance, scalability, and clean code</li></ul><p>We&apos;d love to learn about your goals and share how we can help.</p><p>Best regards,<br />BidWork Agency</p></div></div><div className="landing-review-actions"><strong>Actions</strong><button type="button">Approve &amp; Send <Send size={13} /></button><button type="button">Approve &amp; Schedule</button><button type="button">Request Changes</button><button className="danger" type="button">Reject Proposal</button><div className="landing-action-group"><strong>Schedule</strong><span><CircleDot size={10} /> Send Now</span><span><Circle size={10} /> Schedule for Later</span><small>May 28, 2025 · 10:00 AM</small></div><div className="landing-action-group"><strong>Boost Strategy</strong><span className="landing-recommended">Recommended</span><small>High Boost · +25% more visibility</small></div></div></div>;
+}
+
+function ControlSection() {
+  return <section className="landing-section" id="control"><div className="landing-container"><SectionIntro eyebrow="Real-time control" icon={Zap} title="Stay in control" emphasis="at every step" description="Real-time alerts and complete bidding control keep you ahead of opportunities—and in charge of every decision." /><div className="landing-control-stack"><div className="landing-feature-card landing-control-card"><div className="landing-feature-copy"><div className="landing-eyebrow landing-eyebrow-teal"><Bell size={16} />Real-Time Notifications</div><h3>Never miss the right opportunity</h3><p>Get instant alerts via Slack, Discord, email, or in-app when a qualified job appears, when approval is needed, or when your connect balance or boosting conditions need attention.</p><CheckList items={["Qualified jobs that match your filters", "Manual approval requests and proposal updates", "Connect balance, boost performance, and budget alerts", "Custom channels, quiet hours, and digest options"]} /></div><NotificationPanel /></div><div className="landing-feature-card landing-control-card landing-control-card-reverse"><div className="landing-feature-copy"><div className="landing-eyebrow landing-eyebrow-violet"><Gauge size={16} />Complete Bid Control</div><h3>You decide what gets sent</h3><p>Review proposals before sending, edit drafts, set approval rules, schedule submissions, control boost strategy, and reject low-fit jobs—all in one place.</p><CheckList items={["Review and edit every proposal before it goes out", "Set manual or rule-based approval workflows", "Schedule submissions for the best time to bid", "Control boosts, budgets, and connect usage", "Reject jobs that aren’t the right fit"]} /></div><ReviewPanel /></div></div></div></section>;
+}
+
+function AnalyticsPanel() {
+  return <div className="landing-analytics-app"><div className="landing-analytics-top"><Brand /><span>Analytics Overview</span><button type="button">May 1 – May 31, 2025 <ChevronDown size={12} /></button></div><div className="landing-analytics-body"><div className="landing-mini-app-side"><span>Dashboard</span><span>Matched Jobs</span><span>Proposals</span><span>Campaigns</span><span>Messages</span><span className="is-active">Analytics</span><span>Settings</span></div><div className="landing-analytics-content"><div className="landing-analytics-metrics"><span><small>Open Rate</small><strong>60%</strong><b>↑ 12.4%</b></span><span><small>Reply Rate</small><strong>21.8%</strong><b>↑ 8.7%</b></span><span><small>Win Rate</small><strong>12.5%</strong><b>↑ 3.1%</b></span><span><small>Meetings Booked</small><strong>48</strong><b>↑ 20.0%</b></span></div><div className="landing-chart-card"><div className="landing-chart-heading"><strong>Performance Over Time</strong><span>● Open Rate　● Reply Rate　● Win Rate</span></div><div className="landing-chart"><i className="chart-line chart-line-teal" /><i className="chart-line chart-line-blue" /><i className="chart-line chart-line-orange" /><div className="chart-grid"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div></div></div><div className="landing-analytics-bottom"><div className="landing-chart-card"><strong>Top Niches by Win Rate</strong>{[["Digital Marketing", "18.7%"], ["Web Development", "15.3%"], ["E-commerce", "14.8%"], ["UX/UI Design", "13.2%"], ["Automation", "11.9%"]].map(([label, value], index) => <div className="landing-niche-row" key={label}><span>{label}</span><i><b style={{ width: `${96 - index * 13}%` }} /></i><strong>{value}</strong></div>)}</div><div className="landing-analytics-table"><strong>Campaign Performance</strong><div className="landing-table-line landing-table-line-head"><span>Campaign</span><span>Sent</span><span>Opened</span><span>Replied</span><span>Win Rate</span></div>{["Web Dev – US", "Digital Marketing – Global", "UX/UI Design – UK"].map((row, index) => <div className="landing-table-line" key={row}><span>{row}</span><span>{["1,328", "1,102", "856"][index]}</span><span>{["812", "661", "498"][index]}</span><span>{["214", "132", "93"][index]}</span><span>{["10.0%", "10.6%", "10.8%"][index]}</span></div>)}</div></div></div></div></div>;
+}
+
+function AcademyPanel() {
+  const paths = [["Get Started", "5 lessons", "60% complete", "teal"], ["Profile & Positioning", "6 lessons", "40% complete", "blue"], ["Outreach & Messaging", "7 lessons", "20% complete", "orange"], ["Proposals That Win", "6 lessons", "0% complete", "violet"]] as const;
+  return <div className="landing-academy-app"><div className="landing-analytics-top"><Brand /><span>Academy</span><div className="landing-search"><Search size={13} />Search lessons, guides, and topics...</div></div><div className="landing-academy-body"><div className="landing-mini-app-side"><span>Dashboard</span><span>Matched Jobs</span><span>Proposals</span><span>Campaigns</span><span>Messages</span><span>Analytics</span><span className="is-active">Academy</span><span>Settings</span></div><div className="landing-academy-content"><div className="landing-academy-heading"><div><h4>Learning Paths</h4><p>Learn, apply, and win more with BidWork.</p></div><a href="#footer">View all paths <ArrowRight size={13} /></a></div><div className="landing-path-grid">{paths.map(([title, lessons, completion, tone]) => <div className={`landing-path-card landing-path-${tone}`} key={title}><div><strong>{title}</strong><small>{lessons}</small></div><span>{completion}</span><i><b style={{ width: completion.split("%")[0] + "%" }} /></i></div>)}</div><div className="landing-academy-lower"><div><strong>Recommended for You</strong>{["Complete Your Profile for More Replies", "The 5-Message Outreach Sequence That Gets Replies", "Proposal Framework That Converts"].map((item, index) => <div className="landing-lesson-row" key={item}><span><BookOpen size={13} /></span><strong>{item}<small>Guide · {index + 8} min read</small></strong><em>{index === 0 ? "In progress" : "Not started"}</em></div>)}</div><div className="landing-daily-check"><strong>Daily Checklist</strong>{["Send 10 new messages", "Follow up with 5 prospects", "Review 3 new matches", "Analyze yesterday’s performance"].map((item, index) => <span key={item}><i className={index === 3 ? "" : "done"}>{index === 3 ? "" : "✓"}</i>{item}<small>{index === 0 ? "10 / 10" : index === 1 ? "6 / 5" : index === 2 ? "3 / 3" : "0 / 1"}</small></span>)}</div></div></div></div></div>;
+}
+
+function AnalyticsSection() {
+  return <section className="landing-section landing-band-section" id="analytics"><div className="landing-container"><div className="landing-band-heading"><span><span className="landing-dot landing-dot-orange" />Optimize performance over time</span></div><div className="landing-feature-card landing-band-card"><div className="landing-feature-copy"><IconBadge icon={BarChart3} /><h3>Advanced <span className="landing-color-teal">Analytics</span></h3><p>Track open rate, reply rate, wins, meetings booked, campaign performance, top niches, and what types of jobs convert best—so you can double down on what works.</p><CheckList items={["Real-time performance across all campaigns and accounts", "Insights that show what to do next", "Export reports and share results with your team"]} /><a className="landing-button landing-button-outline" href="#footer">Explore analytics <ArrowRight size={16} /></a></div><AnalyticsPanel /></div><div className="landing-feature-card landing-band-card landing-band-card-reverse"><div className="landing-feature-copy"><IconBadge icon={GraduationCap} tone="teal" /><h3>BidWork <span className="landing-color-teal">Academy</span></h3><p>Access onboarding playbooks, setup guides, proposal frameworks, and lessons that help you improve your profile, targeting, and messaging—step by step.</p><CheckList items={["Structured learning paths for every stage", "Actionable guides and templates you can use today", "Learn from winning freelancers and agencies"]} /><a className="landing-button landing-button-outline" href="#footer">Explore Academy <ArrowRight size={16} /></a></div><AcademyPanel /></div></div></section>;
+}
+
+function ComparisonSection() {
+  const manual = [["Most good jobs seen too late", Eye], ["Bids sent hours after posting", Clock3], ["3.5 hours a day wasted", Clock3], ["18% open rate", Mail], ["9.4% reply rate", MessageCircle]] as const;
+  const bidwork = [["Matched jobs surfaced instantly", Zap], ["Apply within 10 minutes of posting", Clock3], ["20 minutes a day of oversight", Clock3], ["58% open rate", Mail], ["22.1% reply rate", MessageCircle]] as const;
+  return <section className="landing-section landing-comparison-section"><div className="landing-container"><SectionIntro eyebrow="Why teams switch" icon={Sparkles} title="A more efficient way to turn Upwork into pipeline" description="BidWork helps teams respond faster, waste fewer hours, and book more qualified conversations—so you can focus on closing, not chasing." /><div className="landing-comparison-grid"><ComparisonCard title="Manual Upwork Process" subtitle="Slow, inconsistent, and hard to scale" items={manual} tone="orange" price="$84" /><div className="landing-vs">VS</div><ComparisonCard title="With BidWork" subtitle="Fast, consistent, and built to win" items={bidwork} tone="teal" price="$13.80" /></div><p className="landing-join-line"><Star size={17} fill="#f58b12" strokeWidth={0} /> Join <strong>2,000+</strong> freelancers and agencies booking more meetings on Upwork with BidWork.</p></div></section>;
+}
+
+function ComparisonCard({ title, subtitle, items, tone, price }: { title: string; subtitle: string; items: ReadonlyArray<readonly [string, Icon]>; tone: "orange" | "teal"; price: string }) {
+  return <article className={`landing-comparison-card landing-comparison-${tone}`}><div className="landing-comparison-title"><IconBadge icon={tone === "teal" ? Sparkles : Users} tone={tone === "teal" ? "teal" : "orange"} /><div><h3>{title}</h3><p>{subtitle}</p></div></div><div className="landing-comparison-items">{items.map(([label, ItemIcon]) => <div key={label}><span><ItemIcon size={17} /></span><p>{label}</p></div>)}</div><div className="landing-comparison-price"><small>Cost per meeting booked</small><strong>{price}</strong><span>per meeting booked</span>{tone === "teal" ? <em><TrendingUp size={13} />6.1x lower cost</em> : null}</div></article>;
+}
+
+const stories = [["PixelPeak Studio", "Web Design Agency", "BidWork saves us hours every week. We send smarter proposals, cut our response time in half, and book more calls as a result.", "James Carter", "Founder", "London, UK", "P", "peach"], ["Aurelia Design", "Brand & Web Studio", "We respond to new projects within minutes now. That speed helps us stand out and win clients others don’t even reach.", "Sophie Nguyen", "Creative Director", "Vancouver, Canada", "A", "lilac"], ["Northline Digital", "SEO & Content Agency", "The targeting filters are incredibly accurate. We only bid on the right projects and our close rate has doubled.", "Daniel Reyes", "CEO", "Austin, USA", "N", "mint"], ["Brightpath Studio", "UI/UX Design Agency", "More replies. Better conversations. Bigger projects. BidWork turned our Upwork channel into a growth engine.", "Priya Shah", "Growth Lead", "Bengaluru, India", "B", "sand"], ["Metricraft Labs", "Automation & Dev", "We replaced our manual proposal process completely. BidWork handles the grunt work so we can focus on delivering results for clients.", "Marco Bianchi", "Co-founder", "Milan, Italy", "M", "blue"]] as const;
+
+function StoriesSection() {
+  return <section className="landing-section landing-stories-section"><div className="landing-container"><SectionIntro eyebrow="Customer Stories" icon={MessageCircle} title="What teams say after switching to" emphasis="BidWork" description="Trusted by independent freelancers and boutique agencies across the world." /><div className="landing-story-grid">{stories.map(([company, type, quote, name, role, location, initials, tone]) => <article className="landing-story-card" key={company}><div className="landing-company-row"><span className={`landing-company-logo logo-${tone}`}>{initials}</span><span><strong>{company}</strong><small>{type}</small></span></div><StarRow /><blockquote>“{quote}”</blockquote><div className="landing-story-person"><Avatar initials={name.split(" ").map((part) => part[0]).join("")} tone={tone} /><span><strong>{name}</strong><small>{role}</small><small><Target size={12} />{location}</small></span></div></article>)}</div><div className="landing-proof-strip landing-proof-strip-four"><div><Clock3 size={20} /><strong>10+ hrs saved</strong><span>per week on outreach</span></div><div><Send size={20} /><strong>70% faster</strong><span>average response time</span></div><div><TrendingUp size={20} /><strong>2x more replies</strong><span>with better targeting</span></div><div><Trophy size={20} /><strong>More clients won</strong><span>higher close rate</span></div></div><p className="landing-join-line"><Star size={17} fill="#f58b12" strokeWidth={0} /> Join <strong>2,000+</strong> freelancers and agencies growing their business with BidWork.</p></div></section>;
+}
+
+function Footer() {
+  return <footer className="landing-footer" id="footer"><div className="landing-container"><div className="landing-footer-stat"><strong>3,126</strong><span>Upwork client conversations started by BidWork users in the last 30 days</span><small><Sparkles size={16} />Even while they were offline.</small><div className="landing-cta-row"><Link className="landing-button landing-button-primary" href={signInHref}>Start Free <ArrowRight size={18} /></Link><a className="landing-button landing-button-outline" href="mailto:luvautomates@gmail.com?subject=BidWork%20demo">Book a Demo <CalendarDays size={18} /></a></div></div><div className="landing-footer-bottom"><div><Brand /><p>© 2026 BidWork.app. All rights reserved.</p></div><nav aria-label="Footer navigation"><a href="#product">Product</a><a href="#features">Features</a><a href="#campaigns">Pricing</a><a href="#proof">Terms</a><a href="#footer">Privacy</a></nav><div className="landing-social-icons"><a href="https://www.linkedin.com" aria-label="LinkedIn"><Code2 size={18} /></a><a href="https://twitter.com" aria-label="Twitter"><MessageCircle size={18} /></a></div></div></div></footer>;
 }
 
 export default function HomePage() {
-  return (
-    <main className="landing-page">
-      <a className="landing-skip-link" href="#content">
-        Skip to content
-      </a>
-
-      <section className="landing-frame landing-hero" id="content">
-        <LandingImage alt="BidWork.app landing page hero" priority src="/landing/hero.png" />
-
-        <div aria-label="Landing page navigation" className="landing-hotspot-layer">
-          <Hotspot className="hotspot-product" href="#features" label="Product" />
-          <Hotspot className="hotspot-features" href="#features" label="Features" />
-          <Hotspot className="hotspot-pricing" href="#campaigns" label="Pricing" />
-          <Hotspot className="hotspot-proof" href="#proof" label="Proof" />
-          <Hotspot className="hotspot-faq" href="#faq" label="FAQ" />
-          <Hotspot className="hotspot-login" href="/sign-in" label="Log in" />
-          <Hotspot
-            className="hotspot-hero-start"
-            href="/sign-in?next=%2Fapp%2Fcampaigns%2Fnew"
-            label="Start free"
-          />
-          <Hotspot
-            className="hotspot-hero-demo"
-            href="mailto:luvautomates@gmail.com?subject=BidWork%20demo"
-            label="Book a demo"
-          />
-        </div>
-
-        <HiddenContent>
-          <h1>Win better Upwork jobs without chasing the feed.</h1>
-          <p>
-            BidWork monitors Upwork 24/7, scores every opportunity for fit, drafts tailored
-            proposals, and helps you bid faster—while you stay in control.
-          </p>
-        </HiddenContent>
-      </section>
-
-      {sections.map((section) => (
-        <section className="landing-frame" id={section.id} key={section.id}>
-          <LandingImage alt={section.alt} src={section.src} />
-
-          {section.id === "faq" ? (
-            <div className="landing-hotspot-layer" aria-label="Closing call to action">
-              <Hotspot
-                className="hotspot-footer-start"
-                href="/sign-in?next=%2Fapp%2Fcampaigns%2Fnew"
-                label="Start free"
-              />
-              <Hotspot
-                className="hotspot-footer-demo"
-                href="mailto:luvautomates@gmail.com?subject=BidWork%20demo"
-                label="Book a demo"
-              />
-            </div>
-          ) : null}
-
-          <HiddenContent>
-            <h2>{section.alt}</h2>
-          </HiddenContent>
-        </section>
-      ))}
-
-    </main>
-  );
+  return <main className="landing-page"><a className="landing-skip-link" href="#product">Skip to content</a><Header /><Hero /><TrustSection /><MatchingSection /><CampaignsSection /><ControlSection /><AnalyticsSection /><ComparisonSection /><StoriesSection /><Footer /></main>;
 }
