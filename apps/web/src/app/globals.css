@@ -37,3 +37,168 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* Public BidWork landing page. The supplied artboards are the source of truth
+   for the marketing surface, so each image keeps its native 16:9 ratio while
+   transparent hotspots make the primary calls to action real links. */
+.landing-page {
+  --landing-ink: #111827;
+  --landing-muted: #526079;
+  --landing-teal: #07978d;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #fff;
+  color: var(--landing-ink);
+}
+
+.landing-frame {
+  position: relative;
+  width: 100%;
+  max-width: 1672px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #fff;
+  line-height: 0;
+}
+
+.landing-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 1672px;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.landing-hotspot-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.landing-hotspot {
+  position: absolute;
+  display: block;
+  pointer-events: auto;
+  border-radius: 999px;
+  outline: none;
+}
+
+.landing-hotspot:focus-visible {
+  box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--landing-teal);
+}
+
+/* Coordinates are percentages of the 1672 × 941 hero artboard. */
+.hotspot-product {
+  top: 2.3%;
+  left: 31.5%;
+  width: 5.5%;
+  height: 3.5%;
+}
+
+.hotspot-features {
+  top: 2.3%;
+  left: 38.2%;
+  width: 6.8%;
+  height: 3.5%;
+}
+
+.hotspot-pricing {
+  top: 2.3%;
+  left: 45.4%;
+  width: 6%;
+  height: 3.5%;
+}
+
+.hotspot-proof {
+  top: 2.3%;
+  left: 51.8%;
+  width: 5.2%;
+  height: 3.5%;
+}
+
+.hotspot-faq {
+  top: 2.3%;
+  left: 57.7%;
+  width: 4.3%;
+  height: 3.5%;
+}
+
+.hotspot-login {
+  top: 1.7%;
+  left: 80.9%;
+  width: 6.7%;
+  height: 5.4%;
+}
+
+.hotspot-hero-start {
+  top: 64.7%;
+  left: 2.6%;
+  width: 13.7%;
+  height: 5.9%;
+}
+
+.hotspot-hero-demo {
+  top: 64.7%;
+  left: 16.9%;
+  width: 13.1%;
+  height: 5.9%;
+}
+
+.hotspot-footer-start {
+  top: 61.4%;
+  left: 33.6%;
+  width: 15.4%;
+  height: 8.4%;
+}
+
+.hotspot-footer-demo {
+  top: 61.4%;
+  left: 50.7%;
+  width: 15.3%;
+  height: 8.4%;
+}
+
+.landing-skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 12px;
+  left: 12px;
+  transform: translateY(-160%);
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #fff;
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+.landing-skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 3px solid #0b9b91;
+  outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+  .landing-page {
+    overflow-x: auto;
+  }
+
+  .landing-frame {
+    width: 960px;
+    max-width: none;
+    margin: 0;
+  }
+
+  .landing-art {
+    width: 960px;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-skip-link {
+    transition: none;
+  }
+}

@@ -5,10 +5,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "SignalFound",
-    template: "%s · SignalFound"
+    default: "BidWork.app",
+    template: "%s · BidWork.app"
   },
-  description: "A focused workspace for qualifying opportunities and drafting proposals."
+  description:
+    "BidWork helps freelancers and agencies find better Upwork opportunities, draft tailored proposals, and stay in control."
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

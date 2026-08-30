@@ -10,8 +10,7 @@ import {
   Pause,
   Play,
   Pencil,
-  Send,
-  Trash2
+  Send
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
