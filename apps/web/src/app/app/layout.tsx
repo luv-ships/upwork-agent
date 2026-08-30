@@ -29,7 +29,7 @@ export default async function AppLayout({ children }: Readonly<{ children: React
             <Image
               alt=""
               aria-hidden="true"
-              className="size-9 object-contain"
+              className="brand-mark-image size-10"
               height={500}
               src="/landing/bidwork-logo-mark.png"
               unoptimized

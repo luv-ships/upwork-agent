@@ -24,7 +24,7 @@ export default async function SignInPage({
               <Image
                 alt=""
                 aria-hidden="true"
-                className="h-10 w-10 object-contain"
+                className="brand-mark-image h-11 w-11"
                 height={500}
                 src="/landing/bidwork-logo-mark.png"
                 unoptimized

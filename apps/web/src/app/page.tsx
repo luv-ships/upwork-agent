@@ -43,7 +43,7 @@ function Brand() {
       <Image
         alt=""
         aria-hidden="true"
-        className="landing-brand-image"
+        className="brand-mark-image landing-brand-image"
         height={160}
         src="/landing/bidwork-logo-mark.png"
         unoptimized
