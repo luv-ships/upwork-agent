@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { getPublicEnvironment } from "@/server/env";
+import { applicationUrl } from "@/server/app-url";
 
 export async function updateSupabaseSession(request: NextRequest) {
   const environment = getPublicEnvironment();
@@ -36,8 +37,7 @@ export async function updateSupabaseSession(request: NextRequest) {
   const isSignIn = request.nextUrl.pathname === "/sign-in";
 
   if (isProtected && !isAuthenticated) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/sign-in";
+    const redirectUrl = applicationUrl("/sign-in");
     redirectUrl.searchParams.set(
       "next",
       `${request.nextUrl.pathname}${request.nextUrl.search}`
@@ -46,10 +46,7 @@ export async function updateSupabaseSession(request: NextRequest) {
   }
 
   if (isSignIn && isAuthenticated) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/app/campaigns";
-    redirectUrl.search = "";
-    return NextResponse.redirect(redirectUrl);
+    return NextResponse.redirect(applicationUrl("/app/campaigns"));
   }
 
   return response;

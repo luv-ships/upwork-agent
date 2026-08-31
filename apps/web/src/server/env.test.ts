@@ -122,6 +122,13 @@ describe("web environment", () => {
     expect(() => getServerEnvironment()).toThrow("APP_URL must use HTTPS");
   });
 
+  it("rejects an internal listener address as the production app URL", () => {
+    validEnvironment();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("APP_URL", "https://0.0.0.0");
+    expect(() => getServerEnvironment()).toThrow("public application hostname");
+  });
+
   it("keeps production MCP polling at the conservative five-minute floor", () => {
     validEnvironment();
     vi.stubEnv("NODE_ENV", "production");

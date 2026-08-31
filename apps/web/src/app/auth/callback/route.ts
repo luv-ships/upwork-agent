@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { createSupabaseServerClient } from "@/server/supabase/server";
 import { safeAppNextPath } from "@/lib/safe-next-path";
+import { applicationUrl } from "@/server/app-url";
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
@@ -9,16 +10,16 @@ export async function GET(request: NextRequest) {
   const nextPath = safeAppNextPath(nextParameter);
 
   if (!code) {
-    return NextResponse.redirect(new URL("/sign-in?error=missing_code", request.url));
+    return NextResponse.redirect(applicationUrl("/sign-in?error=missing_code"));
   }
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(new URL("/sign-in?error=oauth_callback", request.url));
+    return NextResponse.redirect(applicationUrl("/sign-in?error=oauth_callback"));
   }
 
   // Workspace creation is completed lazily by the authenticated app layout.
-  return NextResponse.redirect(new URL(nextPath, request.url));
+  return NextResponse.redirect(applicationUrl(nextPath));
 }

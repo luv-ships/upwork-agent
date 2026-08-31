@@ -4,9 +4,10 @@ import { getCurrentUser } from "@/server/auth";
 import { getDatabase } from "@/server/database";
 import { getServerEnvironment } from "@/server/env";
 import { completeUpworkMcpOAuthAuthorization, getUpworkMcpOAuthSettings } from "@/server/upwork-oauth";
+import { applicationUrl } from "@/server/app-url";
 
-function campaignsUrl(request: NextRequest, result: string): URL {
-  const url = new URL("/app/campaigns", request.url);
+function campaignsUrl(result: string): URL {
+  const url = applicationUrl("/app/campaigns");
   url.searchParams.set("upwork", result);
   return url;
 }
@@ -14,12 +15,12 @@ function campaignsUrl(request: NextRequest, result: string): URL {
 /** Completes a previously stored PKCE flow; callback error text is never reflected. */
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
-  if (user === null) return NextResponse.redirect(campaignsUrl(request, "sign_in_required"));
+  if (user === null) return NextResponse.redirect(campaignsUrl("sign_in_required"));
 
   const state = request.nextUrl.searchParams.get("state");
   const code = request.nextUrl.searchParams.get("code");
   if (state === null || code === null || request.nextUrl.searchParams.has("error")) {
-    return NextResponse.redirect(campaignsUrl(request, "authorization_cancelled"));
+    return NextResponse.redirect(campaignsUrl("authorization_cancelled"));
   }
 
   try {
@@ -38,8 +39,8 @@ export async function GET(request: NextRequest) {
       ...(issuer === null ? {} : { issuer }),
       ...settings
     });
-    return NextResponse.redirect(campaignsUrl(request, "connected"));
+    return NextResponse.redirect(campaignsUrl("connected"));
   } catch {
-    return NextResponse.redirect(campaignsUrl(request, "authorization_failed"));
+    return NextResponse.redirect(campaignsUrl("authorization_failed"));
   }
 }

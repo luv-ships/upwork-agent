@@ -36,7 +36,10 @@ E2E_AUTH_ENABLED=false
 ```
 
 `APP_URL` and `UPWORK_MCP_OAUTH_REDIRECT_URL` must use the final HTTPS domain.
-The callback URL must also be registered with the Upwork MCP OAuth client
+Never set `APP_URL` to Railway's internal listener (`0.0.0.0`), localhost, or a
+container hostname; browser-facing auth and sign-out redirects are built from
+this canonical URL, and production validation rejects loopback hosts. The
+callback URL must also be registered with the Upwork MCP OAuth client
 configuration. The encryption secret is a server-only 32-byte key encoded as
 base64; generate it locally and enter it directly into Railway's secret store.
 

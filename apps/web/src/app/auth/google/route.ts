@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getServerEnvironment } from "@/server/env";
 import { createSupabaseServerClient } from "@/server/supabase/server";
 import { safeAppNextPath } from "@/lib/safe-next-path";
+import { applicationUrl } from "@/server/app-url";
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,7 +30,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.redirect(data.url);
   } catch {
-    const fallbackUrl = new URL("/sign-in?error=configuration", request.url);
-    return NextResponse.redirect(fallbackUrl);
+    return NextResponse.redirect(applicationUrl("/sign-in?error=configuration"));
   }
 }

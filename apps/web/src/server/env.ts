@@ -32,14 +32,14 @@ const optionalEncryptionKey = z.preprocess(
 );
 
 const publicEnvironmentSchema = z.object({
+  APP_URL: z.url(),
   NEXT_PUBLIC_SUPABASE_URL: z.url(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1)
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development")
 });
 
 const serverEnvironmentSchema = publicEnvironmentSchema.extend({
-  APP_URL: z.url(),
   DATABASE_URL: z.string().min(1),
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   E2E_AUTH_ENABLED: z
     .enum(["true", "false"])
     .default("false")
@@ -71,10 +71,15 @@ const serverEnvironmentSchema = publicEnvironmentSchema.extend({
 export type ServerEnvironment = z.infer<typeof serverEnvironmentSchema>;
 
 export function getPublicEnvironment() {
-  return publicEnvironmentSchema.parse({
+  const environment = publicEnvironmentSchema.parse({
+    APP_URL: process.env.APP_URL,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NODE_ENV: process.env.NODE_ENV
   });
+
+  assertPublicApplicationUrl(environment.APP_URL, environment.NODE_ENV);
+  return environment;
 }
 
 export function getServerEnvironment(): ServerEnvironment {
@@ -104,12 +109,7 @@ export function getServerEnvironment(): ServerEnvironment {
     );
   }
 
-  if (
-    environment.NODE_ENV === "production" &&
-    new URL(environment.APP_URL).protocol !== "https:"
-  ) {
-    throw new Error("APP_URL must use HTTPS in production.");
-  }
+  assertPublicApplicationUrl(environment.APP_URL, environment.NODE_ENV);
 
   if (environment.NODE_ENV === "production" && environment.DEV_INGESTION_ENABLED) {
     throw new Error("Development job ingestion cannot be enabled in production.");
@@ -159,4 +159,17 @@ export function getServerEnvironment(): ServerEnvironment {
   }
 
   return environment;
+}
+
+function assertPublicApplicationUrl(appUrl: string, nodeEnvironment: ServerEnvironment["NODE_ENV"]): void {
+  if (nodeEnvironment !== "production") return;
+
+  const url = new URL(appUrl);
+  if (url.protocol !== "https:") {
+    throw new Error("APP_URL must use HTTPS in production.");
+  }
+
+  if (["0.0.0.0", "127.0.0.1", "::1", "[::1]", "localhost"].includes(url.hostname)) {
+    throw new Error("APP_URL must use the public application hostname in production.");
+  }
 }

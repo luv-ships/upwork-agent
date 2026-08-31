@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import type { Metadata } from "next";
 
@@ -33,10 +33,6 @@ export default async function SignInPage({
               <span className="text-[22px] font-extrabold tracking-[-0.04em] text-[#111827]">
                 BidWork<span className="text-[15px] font-semibold">.app</span>
               </span>
-            </div>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#ccebe5] bg-white/75 px-4 py-2 text-sm font-semibold text-[#087b74]">
-              <Sparkles className="size-4" aria-hidden="true" />
-              AI Upwork Assistant
             </div>
             <h1 className="text-4xl font-semibold tracking-[-0.05em] text-[#111827] sm:text-5xl">
               Find the work worth winning.

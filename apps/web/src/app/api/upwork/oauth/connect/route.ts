@@ -5,9 +5,10 @@ import { getCurrentUser } from "@/server/auth";
 import { getDatabase } from "@/server/database";
 import { getServerEnvironment } from "@/server/env";
 import { getUpworkMcpOAuthSettings, startUpworkMcpOAuthAuthorization } from "@/server/upwork-oauth";
+import { applicationUrl } from "@/server/app-url";
 
-function campaignsUrl(request: NextRequest, result: string): URL {
-  const url = new URL("/app/campaigns", request.url);
+function campaignsUrl(result: string): URL {
+  const url = applicationUrl("/app/campaigns");
   url.searchParams.set("upwork", result);
   return url;
 }
@@ -19,12 +20,12 @@ const connectCommandSchema = z.object({
 /** Starts only the user-directed OAuth consent flow; it never searches jobs. */
 export async function POST(request: NextRequest) {
   const user = await getCurrentUser();
-  if (user === null) return NextResponse.redirect(campaignsUrl(request, "sign_in_required"));
+  if (user === null) return NextResponse.redirect(campaignsUrl("sign_in_required"));
 
   try {
     const environment = getServerEnvironment();
     if (request.headers.get("origin") !== new URL(environment.APP_URL).origin) {
-      return NextResponse.redirect(campaignsUrl(request, "invalid_origin"));
+      return NextResponse.redirect(campaignsUrl("invalid_origin"));
     }
     const command = connectCommandSchema.parse({
       orgUid: (await request.formData()).get("orgUid")
@@ -43,6 +44,6 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.redirect(authorizationUrl);
   } catch {
-    return NextResponse.redirect(campaignsUrl(request, "configuration_error"));
+    return NextResponse.redirect(campaignsUrl("configuration_error"));
   }
 }
