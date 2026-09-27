@@ -81,7 +81,7 @@ Out of scope for the Phase 1 baseline (with the narrow monitor amendment above):
 - any Upwork application submission or Playwright browser worker;
 - CRM, unified inbox, email automation, advanced analytics, and a data
   warehouse;
-- invitations, multi-account orchestration, billing, feature flags, and
+- invitations, cross-workspace account orchestration, billing, feature flags, and
   multi-region deployment;
 - Kubernetes, a message broker, event sourcing, and generic agent/tool-calling
   infrastructure.
@@ -225,6 +225,10 @@ it in a public `users` table on day one. Add an `app_users` profile only when
 there is an actual application-owned user field to persist.
 
 Each new user receives one `workspace` with `owner_user_id = auth.users.id`.
+Each workspace owns one or more `upwork_profiles`, which are a BidWork
+configuration boundary rather than an additional authenticated account. The
+active profile scopes campaigns, knowledge documents, AI suitability, and
+proposal generation. Existing data is migrated into a default General Profile.
 There is no invitation or `workspace_members` table in this launch scope.
 Every tenant-owned table carries `workspace_id`, and server-side commands first
 verify that the authenticated user owns that workspace.

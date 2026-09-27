@@ -173,6 +173,49 @@ export const workspaces = pgTable(
   ],
 );
 
+/**
+ * A user-facing Upwork specialization. Product configuration is intentionally
+ * scoped here so a profile can never borrow another profile's campaigns or
+ * proposal grounding.
+ */
+export const upworkProfiles = pgTable(
+  "upwork_profiles",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    title: text("title").notNull().default(""),
+    professionalSummary: text("professional_summary").notNull().default(""),
+    coreServices: jsonb("core_services").$type<string[]>().notNull().default([]),
+    tools: jsonb("tools").$type<string[]>().notNull().default([]),
+    idealCustomerProfile: text("ideal_customer_profile").notNull().default(""),
+    preferredProjects: text("preferred_projects").notNull().default(""),
+    projectsToAvoid: text("projects_to_avoid").notNull().default(""),
+    languages: jsonb("languages").$type<string[]>().notNull().default([]),
+    additionalAiInstructions: text("additional_ai_instructions").notNull().default(""),
+    isDefault: boolean("is_default").notNull().default(false),
+    configVersion: integer("config_version").notNull().default(1),
+    createdAt,
+    updatedAt,
+  },
+  (table) => [
+    unique("upwork_profiles_workspace_id_id_key").on(table.workspaceId, table.id),
+    unique("upwork_profiles_workspace_name_key").on(table.workspaceId, table.name),
+    uniqueIndex("upwork_profiles_one_default_per_workspace_idx")
+      .on(table.workspaceId)
+      .where(sql`${table.isDefault}`),
+    index("upwork_profiles_workspace_updated_idx").on(table.workspaceId, table.updatedAt.desc()),
+    check("upwork_profiles_name_length_check", sql`char_length(btrim(${table.name})) between 1 and 120`),
+    check("upwork_profiles_title_length_check", sql`char_length(${table.title}) <= 160`),
+    check("upwork_profiles_config_version_check", sql`${table.configVersion} >= 1`),
+    check("upwork_profiles_core_services_array_check", sql`jsonb_typeof(${table.coreServices}) = 'array'`),
+    check("upwork_profiles_tools_array_check", sql`jsonb_typeof(${table.tools}) = 'array'`),
+    check("upwork_profiles_languages_array_check", sql`jsonb_typeof(${table.languages}) = 'array'`),
+  ],
+);
+
 export const campaigns = pgTable(
   "campaigns",
   {
@@ -180,6 +223,7 @@ export const campaigns = pgTable(
     workspaceId: uuid("workspace_id")
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
+    profileId: uuid("profile_id").notNull(),
     name: text("name").notNull(),
     status: campaignStatusEnum("status").notNull().default("draft"),
     filters: jsonb("filters").$type<CampaignFilterV1>().notNull(),
@@ -190,8 +234,13 @@ export const campaigns = pgTable(
     updatedAt,
   },
   (table) => [
+    foreignKey({
+      name: "campaigns_workspace_profile_fk",
+      columns: [table.workspaceId, table.profileId],
+      foreignColumns: [upworkProfiles.workspaceId, upworkProfiles.id],
+    }).onDelete("restrict"),
     unique("campaigns_workspace_id_id_key").on(table.workspaceId, table.id),
-    index("campaigns_workspace_status_idx").on(table.workspaceId, table.status),
+    index("campaigns_workspace_profile_status_idx").on(table.workspaceId, table.profileId, table.status),
     index("campaigns_active_workspace_idx")
       .on(table.workspaceId, table.updatedAt)
       .where(sql`${table.status} = 'active'`),
@@ -608,6 +657,7 @@ export const campaignJobMatches = pgTable(
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
     campaignId: uuid("campaign_id").notNull(),
+    profileId: uuid("profile_id").notNull(),
     jobId: uuid("job_id").notNull(),
     campaignConfigVersion: integer("campaign_config_version").notNull(),
     jobRevision: integer("job_revision").notNull(),
@@ -634,6 +684,11 @@ export const campaignJobMatches = pgTable(
     updatedAt,
   },
   (table) => [
+    foreignKey({
+      name: "campaign_job_matches_workspace_profile_fk",
+      columns: [table.workspaceId, table.profileId],
+      foreignColumns: [upworkProfiles.workspaceId, upworkProfiles.id],
+    }).onDelete("restrict"),
     foreignKey({
       name: "campaign_job_matches_workspace_campaign_fk",
       columns: [table.workspaceId, table.campaignId],
@@ -704,6 +759,7 @@ export const aiScores = pgTable(
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
     matchId: uuid("match_id").notNull(),
+    profileId: uuid("profile_id").notNull(),
     inputHash: text("input_hash").notNull(),
     provider: text("provider").notNull(),
     model: text("model").notNull(),
@@ -726,6 +782,11 @@ export const aiScores = pgTable(
     createdAt,
   },
   (table) => [
+    foreignKey({
+      name: "ai_scores_workspace_profile_fk",
+      columns: [table.workspaceId, table.profileId],
+      foreignColumns: [upworkProfiles.workspaceId, upworkProfiles.id],
+    }).onDelete("restrict"),
     foreignKey({
       name: "ai_scores_workspace_match_fk",
       columns: [table.workspaceId, table.matchId],
@@ -782,6 +843,7 @@ export const knowledgeDocuments = pgTable(
     workspaceId: uuid("workspace_id")
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
+    profileId: uuid("profile_id").notNull(),
     title: text("title").notNull(),
     content: text("content").notNull(),
     contentHash: text("content_hash").notNull(),
@@ -791,9 +853,14 @@ export const knowledgeDocuments = pgTable(
     updatedAt,
   },
   (table) => [
+    foreignKey({
+      name: "knowledge_documents_workspace_profile_fk",
+      columns: [table.workspaceId, table.profileId],
+      foreignColumns: [upworkProfiles.workspaceId, upworkProfiles.id],
+    }).onDelete("restrict"),
     unique("knowledge_documents_workspace_id_id_key").on(table.workspaceId, table.id),
-    unique("knowledge_documents_workspace_hash_key").on(table.workspaceId, table.contentHash),
-    index("knowledge_documents_workspace_status_idx").on(table.workspaceId, table.status),
+    unique("knowledge_documents_workspace_profile_hash_key").on(table.workspaceId, table.profileId, table.contentHash),
+    index("knowledge_documents_workspace_profile_status_idx").on(table.workspaceId, table.profileId, table.status),
     check("knowledge_documents_title_length_check", sql`char_length(btrim(${table.title})) between 1 and 200`),
     check("knowledge_documents_content_length_check", sql`char_length(${table.content}) between 1 and 200000`),
     check("knowledge_documents_hash_check", sql`${table.contentHash} ~ '^[0-9a-f]{64}$'`),
@@ -839,6 +906,7 @@ export const proposals = pgTable(
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
     matchId: uuid("match_id").notNull(),
+    profileId: uuid("profile_id").notNull(),
     status: proposalStatusEnum("status").notNull().default("queued"),
     currentVersion: integer("current_version").notNull().default(0),
     failureCode: text("failure_code"),
@@ -846,6 +914,11 @@ export const proposals = pgTable(
     updatedAt,
   },
   (table) => [
+    foreignKey({
+      name: "proposals_workspace_profile_fk",
+      columns: [table.workspaceId, table.profileId],
+      foreignColumns: [upworkProfiles.workspaceId, upworkProfiles.id],
+    }).onDelete("restrict"),
     foreignKey({
       name: "proposals_workspace_match_fk",
       columns: [table.workspaceId, table.matchId],
@@ -865,6 +938,7 @@ export const proposalVersions = pgTable(
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
     proposalId: uuid("proposal_id").notNull(),
+    profileId: uuid("profile_id").notNull(),
     version: integer("version").notNull(),
     body: text("body").notNull(),
     sourceChunkIds: jsonb("source_chunk_ids").$type<string[]>().notNull().default([]),
@@ -877,6 +951,11 @@ export const proposalVersions = pgTable(
     createdAt,
   },
   (table) => [
+    foreignKey({
+      name: "proposal_versions_workspace_profile_fk",
+      columns: [table.workspaceId, table.profileId],
+      foreignColumns: [upworkProfiles.workspaceId, upworkProfiles.id],
+    }).onDelete("restrict"),
     foreignKey({
       name: "proposal_versions_workspace_proposal_fk",
       columns: [table.workspaceId, table.proposalId],
@@ -1017,6 +1096,7 @@ export const analyticsEvents = pgTable(
 );
 
 export type WorkspaceRow = typeof workspaces.$inferSelect;
+export type UpworkProfileRow = typeof upworkProfiles.$inferSelect;
 export type CampaignRow = typeof campaigns.$inferSelect;
 export type UpworkConnectionRow = typeof upworkConnections.$inferSelect;
 export type UpworkOAuthAuthorizationRow = typeof upworkOAuthAuthorizations.$inferSelect;

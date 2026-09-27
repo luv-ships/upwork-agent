@@ -9,6 +9,7 @@ import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import type { Database } from "./database.js";
+import { ensureDefaultUpworkProfileForWorkspace } from "./profiles.js";
 import {
   aiScores,
   analyticsEvents,
@@ -16,6 +17,7 @@ import {
   campaignJobMatches,
   jobs,
   upworkMonitors,
+  upworkProfiles,
   workflowTasks,
   workspaces,
   type AiScoreRow,
@@ -85,6 +87,7 @@ export async function ensureWorkspaceForUser(
     .returning();
   const created = inserted[0];
   if (created !== undefined) {
+    await ensureDefaultUpworkProfileForWorkspace(database, { workspaceId: created.id });
     return created;
   }
 
@@ -92,6 +95,7 @@ export async function ensureWorkspaceForUser(
   if (existing === null) {
     throw new Error("Workspace conflicted but could not be reloaded");
   }
+  await ensureDefaultUpworkProfileForWorkspace(database, { workspaceId: existing.id });
   return existing;
 }
 
@@ -110,13 +114,15 @@ export async function getWorkspaceForOwner(
 
 export async function listCampaigns(
   database: Database,
-  input: { readonly ownerUserId: string },
+  input: { readonly ownerUserId: string; readonly profileId?: string },
 ): Promise<CampaignRow[]> {
   const ownerUserId = uuidSchema.parse(input.ownerUserId);
+  const profileId = input.profileId === undefined ? undefined : uuidSchema.parse(input.profileId);
   return database
     .select({
       id: campaigns.id,
       workspaceId: campaigns.workspaceId,
+      profileId: campaigns.profileId,
       name: campaigns.name,
       status: campaigns.status,
       filters: campaigns.filters,
@@ -128,20 +134,22 @@ export async function listCampaigns(
     })
     .from(campaigns)
     .innerJoin(workspaces, eq(campaigns.workspaceId, workspaces.id))
-    .where(eq(workspaces.ownerUserId, ownerUserId))
+    .where(and(eq(workspaces.ownerUserId, ownerUserId), ...(profileId === undefined ? [] : [eq(campaigns.profileId, profileId)])))
     .orderBy(desc(campaigns.updatedAt));
 }
 
 export async function getCampaign(
   database: Database,
-  input: { readonly ownerUserId: string; readonly campaignId: string },
+  input: { readonly ownerUserId: string; readonly campaignId: string; readonly profileId?: string },
 ): Promise<CampaignRow | null> {
   const ownerUserId = uuidSchema.parse(input.ownerUserId);
   const campaignId = uuidSchema.parse(input.campaignId);
+  const profileId = input.profileId === undefined ? undefined : uuidSchema.parse(input.profileId);
   const rows = await database
     .select({
       id: campaigns.id,
       workspaceId: campaigns.workspaceId,
+      profileId: campaigns.profileId,
       name: campaigns.name,
       status: campaigns.status,
       filters: campaigns.filters,
@@ -157,6 +165,7 @@ export async function getCampaign(
       and(
         eq(campaigns.id, campaignId),
         eq(workspaces.ownerUserId, ownerUserId),
+        ...(profileId === undefined ? [] : [eq(campaigns.profileId, profileId)]),
       ),
     )
     .limit(1);
@@ -166,6 +175,7 @@ export async function getCampaign(
 export interface CreateCampaignInput {
   readonly ownerUserId: string;
   readonly workspaceId: string;
+  readonly profileId?: string;
   readonly name: string;
   readonly filters: CampaignFilterV1;
   readonly aiInstructions: string;
@@ -179,6 +189,7 @@ export async function createCampaign(
 ): Promise<CampaignRow | null> {
   const ownerUserId = uuidSchema.parse(input.ownerUserId);
   const workspaceId = uuidSchema.parse(input.workspaceId);
+  const profileId = input.profileId === undefined ? undefined : uuidSchema.parse(input.profileId);
   const name = campaignNameSchema.parse(input.name);
   const filters = campaignFilterV1Schema.parse(input.filters);
   const aiInstructions = aiInstructionsSchema.parse(input.aiInstructions);
@@ -201,11 +212,16 @@ export async function createCampaign(
     if (workspace === undefined) {
       return null;
     }
+    const profile = profileId === undefined
+      ? await ensureDefaultUpworkProfileForWorkspace(transaction, { workspaceId: workspace.id })
+      : (await transaction.select({ id: upworkProfiles.id }).from(upworkProfiles).where(and(eq(upworkProfiles.workspaceId, workspace.id), eq(upworkProfiles.id, profileId))).limit(1))[0];
+    if (profile === undefined) return null;
 
     const rows = await transaction
       .insert(campaigns)
       .values({
         workspaceId: workspace.id,
+        profileId: profile.id,
         name,
         status,
         filters,
@@ -240,6 +256,7 @@ export async function updateCampaign(
       .select({
         id: campaigns.id,
         workspaceId: campaigns.workspaceId,
+        profileId: campaigns.profileId,
         name: campaigns.name,
         status: campaigns.status,
         filters: campaigns.filters,
@@ -814,7 +831,7 @@ async function getCampaignUpstreamWork(
 
 export async function getCampaignDetailView(
   database: Database,
-  input: { readonly ownerUserId: string; readonly campaignId: string },
+  input: { readonly ownerUserId: string; readonly campaignId: string; readonly profileId?: string },
 ): Promise<CampaignDetailView | null> {
   const campaign = await getCampaign(database, input);
   if (campaign === null) {

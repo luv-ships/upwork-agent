@@ -31,6 +31,15 @@ export {
 } from "./repositories.js";
 
 export {
+  createUpworkProfile,
+  ensureDefaultUpworkProfileForWorkspace,
+  getUpworkProfile,
+  listUpworkProfiles,
+  updateUpworkProfile,
+  type UpworkProfileSummary,
+} from "./profiles.js";
+
+export {
   commitJobMatches,
   commitJobNormalization,
   commitMatchAnalysis,
@@ -162,6 +171,7 @@ export {
   upworkJobObservations,
   upworkMonitorStatusEnum,
   upworkMonitors,
+  upworkProfiles,
   workflowTaskKindEnum,
   workflowTasks,
   workflowTaskStatusEnum,
@@ -184,5 +194,6 @@ export {
   type UpworkOAuthAuthorizationRow,
   type UpworkOAuthCredentialRow,
   type UpworkMonitorRow,
+  type UpworkProfileRow,
   type WorkspaceRow,
 } from "./schema.js";

@@ -72,6 +72,29 @@ describe("FakeAIProvider", () => {
     expect(review.recommendation).toBe("review");
   });
 
+  it("classifies work excluded by the active profile as unsuitable", async () => {
+    const provider = new FakeAIProvider();
+    const input = suitabilityInput(75);
+    const result = await provider.assessSuitability({
+      ...input,
+      profile: {
+        name: "AI Automation",
+        professionalSummary: "Automation delivery",
+        coreServices: ["AI automation"],
+        tools: ["OpenAI"],
+        idealCustomerProfile: "Teams adopting automation",
+        preferredProjects: "Workflow automation",
+        projectsToAvoid: "Make.com automation",
+        languages: ["English"],
+        additionalAiInstructions: "",
+      },
+    });
+
+    expect(result.recommendation).toBe("skip");
+    expect(result.reasons[0]).toContain("projects to avoid");
+    expect(result.risks).toContain("The requested work matches a profile-specific exclusion");
+  });
+
   it("validates its input at the provider boundary", async () => {
     const invalidInput = {
       ...suitabilityInput(75),

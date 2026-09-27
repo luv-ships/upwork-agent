@@ -2,6 +2,13 @@
 
 ## Status
 
+**Profile context amendment (2026-09-26):** approved profile-specific campaign,
+knowledge, analysis, and proposal context is now being added. Existing
+workspace-owned records are backfilled to a `General Profile`; profile
+selection is a global authenticated-app context. This remains a BidWork-owned
+configuration layer and does not imply multi-account Upwork automation or any
+new discovery/submission permission.
+
 **Checkpoints 1 and 2 are implemented as of 2026-08-21.** The key-free
 fake-provider score loop, private knowledge indexing, workspace-scoped
 retrieval, immutable proposal versions, authenticated review queue, and

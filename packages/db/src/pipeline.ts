@@ -26,6 +26,7 @@ import {
   upworkJobObservations,
   upworkConnections,
   upworkMonitors,
+  upworkProfiles,
   workflowTasks,
 } from "./schema.js";
 
@@ -335,6 +336,7 @@ export async function loadJobMatchContext(
   const campaignSelection = {
     id: campaigns.id,
     workspaceId: campaigns.workspaceId,
+    profileId: campaigns.profileId,
     name: campaigns.name,
     configVersion: campaigns.configVersion,
     filters: campaigns.filters,
@@ -463,6 +465,7 @@ export async function commitJobMatches(
               .select({
                 id: campaigns.id,
                 workspaceId: campaigns.workspaceId,
+                profileId: campaigns.profileId,
                 name: campaigns.name,
                 status: campaigns.status,
                 filters: campaigns.filters,
@@ -538,6 +541,7 @@ export async function commitJobMatches(
         .values({
           workspaceId,
           campaignId: campaign.id,
+          profileId: campaign.profileId,
           jobId,
           campaignConfigVersion: campaign.configVersion,
           jobRevision: normalizedRevision,
@@ -642,8 +646,15 @@ export async function loadMatchAnalysisContext(
   const matchId = uuidSchema.parse(input.matchId);
   const inputHash = hashSchema.parse(input.inputHash);
   const rows = await database
-    .select({ match: campaignJobMatches, job: jobs, scoreId: aiScores.id })
+    .select({ match: campaignJobMatches, job: jobs, scoreId: aiScores.id, profile: upworkProfiles })
     .from(campaignJobMatches)
+    .innerJoin(
+      upworkProfiles,
+      and(
+        eq(upworkProfiles.id, campaignJobMatches.profileId),
+        eq(upworkProfiles.workspaceId, campaignJobMatches.workspaceId),
+      ),
+    )
     .innerJoin(
       jobs,
       and(
@@ -680,6 +691,17 @@ export async function loadMatchAnalysisContext(
       filters: row.match.filterSnapshot,
       aiInstructions: row.match.aiInstructionsSnapshot,
       scoreThreshold: row.match.scoreThresholdSnapshot,
+    },
+    profile: {
+      name: row.profile.name,
+      professionalSummary: row.profile.professionalSummary,
+      coreServices: row.profile.coreServices,
+      tools: row.profile.tools,
+      idealCustomerProfile: row.profile.idealCustomerProfile,
+      preferredProjects: row.profile.preferredProjects,
+      projectsToAvoid: row.profile.projectsToAvoid,
+      languages: row.profile.languages,
+      additionalAiInstructions: row.profile.additionalAiInstructions,
     },
     deterministicEvidence: filterEvidenceSchema.parse(
       row.match.deterministicEvidence,
@@ -804,6 +826,7 @@ export async function commitMatchAnalysis(
       .values({
         workspaceId,
         matchId,
+        profileId: match.profileId,
         inputHash,
         provider,
         model,

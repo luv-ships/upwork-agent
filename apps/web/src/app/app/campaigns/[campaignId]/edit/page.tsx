@@ -9,6 +9,7 @@ import { CampaignForm } from "@/components/campaign/campaign-form";
 import { updateCampaignAction } from "@/server/actions/campaigns";
 import { requireUser } from "@/server/auth";
 import { getDatabase } from "@/server/database";
+import { getActiveProfileContext } from "@/server/profile-context";
 
 export const metadata: Metadata = { title: "Edit campaign" };
 
@@ -24,7 +25,8 @@ export default async function EditCampaignPage({
     searchParams,
     requireUser()
   ]);
-  const campaign = await getCampaign(getDatabase(), { ownerUserId: user.id, campaignId });
+  const profileContext = await getActiveProfileContext({ ownerUserId: user.id, workspaceName: "My workspace" });
+  const campaign = await getCampaign(getDatabase(), { ownerUserId: user.id, campaignId, profileId: profileContext.activeProfile.id });
   if (campaign === null || campaign.status === "archived") notFound();
 
   return (

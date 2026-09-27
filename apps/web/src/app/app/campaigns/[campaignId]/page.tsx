@@ -44,6 +44,7 @@ import { DeleteCampaignButton } from "@/components/campaign/delete-campaign-butt
 import { requireUser } from "@/server/auth";
 import { getDatabase } from "@/server/database";
 import { getServerEnvironment } from "@/server/env";
+import { getActiveProfileContext } from "@/server/profile-context";
 
 export const metadata: Metadata = { title: "Campaign" };
 
@@ -127,9 +128,11 @@ export default async function CampaignDetailPage({
   const { campaignId } = await params;
   const user = await requireUser();
   const database = getDatabase();
+  const profileContext = await getActiveProfileContext({ ownerUserId: user.id, workspaceName: "My workspace" });
   const detail = await getCampaignDetailView(database, {
     ownerUserId: user.id,
-    campaignId
+    campaignId,
+    profileId: profileContext.activeProfile.id,
   });
   if (detail === null) notFound();
 

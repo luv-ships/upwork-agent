@@ -23,6 +23,7 @@ import {
   knowledgeDocuments,
   proposals,
   proposalVersions,
+  upworkProfiles,
   workspaces,
   workflowTasks,
 } from "./schema.js";
@@ -106,9 +107,10 @@ export type KnowledgeDocumentView = {
 
 export async function createKnowledgeDocument(
   database: Database,
-  input: { readonly ownerUserId: string; readonly title: string; readonly content: string },
+  input: { readonly ownerUserId: string; readonly profileId: string; readonly title: string; readonly content: string },
 ): Promise<CreateKnowledgeDocumentResult> {
   const ownerUserId = uuidSchema.parse(input.ownerUserId);
+  const profileId = uuidSchema.parse(input.profileId);
   const title = z.string().trim().min(1).max(200).parse(input.title);
   const content = z.string().trim().min(1).max(200_000).parse(input.content);
   const hash = createInputHash({ content });
@@ -120,17 +122,23 @@ export async function createKnowledgeDocument(
       .limit(1);
     const workspace = workspaceRows[0];
     if (workspace === undefined) throw new Error("Workspace not found");
+    const ownedProfile = await transaction
+      .select({ id: upworkProfiles.id })
+      .from(upworkProfiles)
+      .where(and(eq(upworkProfiles.workspaceId, workspace.id), eq(upworkProfiles.id, profileId)))
+      .limit(1);
+    if (ownedProfile[0] === undefined) throw new Error("Profile not found");
     const inserted = await transaction
       .insert(knowledgeDocuments)
-      .values({ workspaceId: workspace.id, title, content, contentHash: hash })
-      .onConflictDoNothing({ target: [knowledgeDocuments.workspaceId, knowledgeDocuments.contentHash] })
+      .values({ workspaceId: workspace.id, profileId, title, content, contentHash: hash })
+      .onConflictDoNothing({ target: [knowledgeDocuments.workspaceId, knowledgeDocuments.profileId, knowledgeDocuments.contentHash] })
       .returning({ id: knowledgeDocuments.id });
     const documentId = inserted[0]?.id;
     if (documentId === undefined) {
       const existing = await transaction
         .select({ id: knowledgeDocuments.id })
         .from(knowledgeDocuments)
-        .where(and(eq(knowledgeDocuments.workspaceId, workspace.id), eq(knowledgeDocuments.contentHash, hash)))
+        .where(and(eq(knowledgeDocuments.workspaceId, workspace.id), eq(knowledgeDocuments.profileId, profileId), eq(knowledgeDocuments.contentHash, hash)))
         .limit(1);
       const existingId = existing[0]?.id;
       if (existingId === undefined) throw new Error("Knowledge document conflict could not be reloaded");
@@ -148,14 +156,15 @@ export async function createKnowledgeDocument(
 
 export async function listKnowledgeDocuments(
   database: Database,
-  input: { readonly ownerUserId: string },
+  input: { readonly ownerUserId: string; readonly profileId?: string },
 ): Promise<KnowledgeDocumentView[]> {
   const ownerUserId = uuidSchema.parse(input.ownerUserId);
+  const profileId = input.profileId === undefined ? undefined : uuidSchema.parse(input.profileId);
   const rows = await database
     .select({ document: knowledgeDocuments })
     .from(knowledgeDocuments)
     .innerJoin(workspaces, and(eq(workspaces.id, knowledgeDocuments.workspaceId), eq(workspaces.ownerUserId, ownerUserId)))
-    .where(eq(knowledgeDocuments.workspaceId, workspaces.id))
+    .where(and(eq(knowledgeDocuments.workspaceId, workspaces.id), ...(profileId === undefined ? [] : [eq(knowledgeDocuments.profileId, profileId)])))
     .orderBy(desc(knowledgeDocuments.updatedAt));
   return rows.map(({ document }) => ({
     id: document.id,
@@ -310,7 +319,7 @@ export async function loadProposalGenerationContext(
       .select({ id: knowledgeChunks.id, title: knowledgeDocuments.title, content: knowledgeChunks.content, ordinal: knowledgeChunks.ordinal })
       .from(knowledgeChunks)
       .innerJoin(knowledgeDocuments, and(eq(knowledgeDocuments.id, knowledgeChunks.documentId), eq(knowledgeDocuments.workspaceId, workspaceId)))
-      .where(and(eq(knowledgeChunks.workspaceId, workspaceId), eq(knowledgeDocuments.status, "ready"), isNotNull(knowledgeChunks.embedding)))
+      .where(and(eq(knowledgeChunks.workspaceId, workspaceId), eq(knowledgeDocuments.profileId, row.match.profileId), eq(knowledgeDocuments.status, "ready"), isNotNull(knowledgeChunks.embedding)))
       .orderBy(sql`${knowledgeChunks.embedding} <=> ${JSON.stringify(queryEmbedding)}::vector`)
       .limit(8);
   const chunks = vectorChunks.length > 0
@@ -319,7 +328,7 @@ export async function loadProposalGenerationContext(
       .select({ id: knowledgeChunks.id, title: knowledgeDocuments.title, content: knowledgeChunks.content, ordinal: knowledgeChunks.ordinal })
       .from(knowledgeChunks)
       .innerJoin(knowledgeDocuments, and(eq(knowledgeDocuments.id, knowledgeChunks.documentId), eq(knowledgeDocuments.workspaceId, workspaceId)))
-      .where(and(eq(knowledgeChunks.workspaceId, workspaceId), eq(knowledgeDocuments.status, "ready")))
+      .where(and(eq(knowledgeChunks.workspaceId, workspaceId), eq(knowledgeDocuments.profileId, row.match.profileId), eq(knowledgeDocuments.status, "ready")))
       .orderBy(asc(knowledgeChunks.ordinal))
       .limit(200);
   const jobTokens = tokenSet(`${row.job.title ?? ""} ${row.job.description ?? ""} ${(row.job.skills ?? []).join(" ")}`);
@@ -380,7 +389,7 @@ export async function commitProposalGeneration(
     const existingProposalRows = await transaction.select().from(proposals).where(and(eq(proposals.matchId, matchId), eq(proposals.workspaceId, workspaceId))).limit(1);
     let proposal = existingProposalRows[0];
     if (proposal === undefined) {
-      const inserted = await transaction.insert(proposals).values({ workspaceId, matchId, status: "generating", currentVersion: 0 }).returning();
+      const inserted = await transaction.insert(proposals).values({ workspaceId, matchId, profileId: match.profileId, status: "generating", currentVersion: 0 }).returning();
       proposal = inserted[0];
     }
     if (proposal === undefined) return { status: "skip" };
@@ -402,6 +411,7 @@ export async function commitProposalGeneration(
     const versions = await transaction.insert(proposalVersions).values({
       workspaceId,
       proposalId: proposal.id,
+      profileId: match.profileId,
       version,
       body: draft.body,
       sourceChunkIds: draft.sourceChunkIds,
@@ -429,7 +439,7 @@ export async function failProposalGeneration(
   const matchId = uuidSchema.parse(input.matchId);
   const failureCode = z.string().trim().regex(/^[a-z0-9_.-]{1,80}$/).parse(input.failureCode);
   return database.transaction(async (transaction) => {
-    const matchRows = await transaction.select({ pipelineStatus: campaignJobMatches.pipelineStatus })
+    const matchRows = await transaction.select({ pipelineStatus: campaignJobMatches.pipelineStatus, profileId: campaignJobMatches.profileId })
       .from(campaignJobMatches)
       .where(and(eq(campaignJobMatches.workspaceId, workspaceId), eq(campaignJobMatches.id, matchId)))
       .for("update")
@@ -445,7 +455,7 @@ export async function failProposalGeneration(
     let proposal = proposalRows[0];
     if (proposal === undefined) {
       const inserted = await transaction.insert(proposals)
-        .values({ workspaceId, matchId, status: "failed", currentVersion: 0, failureCode })
+        .values({ workspaceId, matchId, profileId: match.profileId, status: "failed", currentVersion: 0, failureCode })
         .onConflictDoNothing({ target: [proposals.workspaceId, proposals.matchId] })
         .returning({ id: proposals.id });
       proposal = inserted[0];
@@ -493,9 +503,10 @@ export type ProposalQueueView = {
 
 export async function listProposalQueueViews(
   database: Database,
-  input: { readonly ownerUserId: string },
+  input: { readonly ownerUserId: string; readonly profileId?: string },
 ): Promise<ProposalQueueView[]> {
   const ownerUserId = uuidSchema.parse(input.ownerUserId);
+  const profileId = input.profileId === undefined ? undefined : uuidSchema.parse(input.profileId);
   const rows = await database
     .select({ proposal: proposals, version: proposalVersions, campaign: campaigns, match: campaignJobMatches, job: jobs })
     .from(proposals)
@@ -504,7 +515,7 @@ export async function listProposalQueueViews(
     .innerJoin(campaigns, and(eq(campaigns.id, campaignJobMatches.campaignId), eq(campaigns.workspaceId, proposals.workspaceId)))
     .innerJoin(jobs, and(eq(jobs.id, campaignJobMatches.jobId), eq(jobs.workspaceId, proposals.workspaceId)))
     .leftJoin(proposalVersions, and(eq(proposalVersions.proposalId, proposals.id), eq(proposalVersions.workspaceId, proposals.workspaceId)))
-    .where(eq(proposals.workspaceId, workspaces.id))
+    .where(and(eq(proposals.workspaceId, workspaces.id), ...(profileId === undefined ? [] : [eq(proposals.profileId, profileId)])))
     .orderBy(desc(proposals.updatedAt), desc(proposalVersions.version));
   const views = new Map<string, ProposalQueueView>();
   for (const row of rows) {

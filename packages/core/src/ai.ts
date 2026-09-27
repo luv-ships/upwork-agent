@@ -20,6 +20,13 @@ export const suitabilityInputSchema = z.object({
     aiInstructions: z.string().max(12_000),
     scoreThreshold: z.number().int().min(0).max(100)
   }),
+  profile: z.object({
+    name: z.string().min(1).max(120), professionalSummary: z.string().max(12_000),
+    coreServices: z.array(z.string().min(1).max(120)).max(100), tools: z.array(z.string().min(1).max(120)).max(100),
+    idealCustomerProfile: z.string().max(12_000), preferredProjects: z.string().max(12_000),
+    projectsToAvoid: z.string().max(12_000), languages: z.array(z.string().min(1).max(120)).max(100),
+    additionalAiInstructions: z.string().max(12_000),
+  }).optional(),
   deterministicEvidence: filterEvidenceSchema,
   preferenceScore: preferenceScoreResultSchema
 });
@@ -73,14 +80,21 @@ export class FakeAIProvider implements TextGenerationProvider {
       commercialSignals > 0 ? "Budget and client characteristics fit" : "Selected job constraints fit",
       `${checks} deterministic filter ${checks === 1 ? "group" : "groups"} passed`
     ];
+    const excludedText = input.profile?.projectsToAvoid.toLocaleLowerCase("en-US") ?? "";
+    const jobText = `${input.job.title} ${input.job.description}`.toLocaleLowerCase("en-US");
+    const conflictsWithProfile = excludedText.split(/[\n,;]+/u).some((term) => {
+      const normalized = term.trim();
+      return normalized.length >= 3 && jobText.includes(normalized);
+    });
 
     return suitabilityResultSchema.parse({
-      score,
-      recommendation: score >= input.campaign.scoreThreshold ? "apply" : "review",
-      reasons,
-      risks: input.campaign.aiInstructions.trim().length === 0
-        ? ["No campaign-specific AI instructions were supplied"]
-        : [],
+      score: conflictsWithProfile ? Math.min(score, input.campaign.scoreThreshold - 1) : score,
+      recommendation: conflictsWithProfile ? "skip" : score >= input.campaign.scoreThreshold ? "apply" : "review",
+      reasons: conflictsWithProfile ? [`Conflicts with ${input.profile?.name}'s projects to avoid`, ...reasons] : reasons,
+      risks: [
+        ...(conflictsWithProfile ? ["The requested work matches a profile-specific exclusion"] : []),
+        ...(input.campaign.aiInstructions.trim().length === 0 ? ["No campaign-specific AI instructions were supplied"] : []),
+      ],
       estimatedWinProbability: Number((Math.min(0.85, Math.max(0.15, score / 120))).toFixed(4)),
       pricingDirection: input.job.jobType === "hourly" ? "hourly" : "market",
       ...(amount === undefined ? {} : { suggestedBidAmount: amount, suggestedBidCurrency: "USD" })

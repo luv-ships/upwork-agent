@@ -13,6 +13,7 @@ import {
 
 import { requireUser } from "@/server/auth";
 import { getDatabase } from "@/server/database";
+import { getActiveProfileContext } from "@/server/profile-context";
 
 const proposalIdSchema = z.uuid();
 
@@ -42,6 +43,7 @@ export async function createKnowledgeDocumentAction(formData: FormData): Promise
   if (!values.success) redirect("/app/knowledge?error=Add%20a%20title%20and%20some%20knowledge");
   const database = getDatabase();
   await ensureWorkspaceForUser(database, { ownerUserId: user.id, name: "My workspace" });
-  await createKnowledgeDocument(database, { ownerUserId: user.id, title: values.data.title, content: values.data.content });
+  const profileContext = await getActiveProfileContext({ ownerUserId: user.id, workspaceName: "My workspace" });
+  await createKnowledgeDocument(database, { ownerUserId: user.id, profileId: profileContext.activeProfile.id, title: values.data.title, content: values.data.content });
   revalidatePath("/app/knowledge");
 }

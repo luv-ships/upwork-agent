@@ -20,6 +20,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/server/auth";
 import { getDatabase } from "@/server/database";
 import { getServerEnvironment } from "@/server/env";
+import { getActiveProfileContext } from "@/server/profile-context";
 
 function strings(formData: FormData, name: string): string[] {
   return formData
@@ -152,9 +153,11 @@ export async function createCampaignAction(formData: FormData): Promise<void> {
     ownerUserId: user.id,
     name: "My workspace"
   });
+  const profileContext = await getActiveProfileContext({ ownerUserId: user.id, workspaceName: "My workspace" });
   const campaign = await createCampaign(database, {
     ownerUserId: user.id,
     workspaceId: workspace.id,
+    profileId: profileContext.activeProfile.id,
     name: command.data.name,
     filters: command.data.filters,
     aiInstructions: command.data.aiInstructions,

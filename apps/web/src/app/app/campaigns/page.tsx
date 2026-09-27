@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { requireUser } from "@/server/auth";
 import { getDatabase } from "@/server/database";
+import { getActiveProfileContext } from "@/server/profile-context";
 
 export const metadata: Metadata = { title: "Campaigns" };
 
@@ -19,7 +20,8 @@ function statusTone(status: string): "success" | "warning" | "neutral" {
 
 export default async function CampaignsPage() {
   const user = await requireUser();
-  const campaigns = await listCampaigns(getDatabase(), { ownerUserId: user.id });
+  const profileContext = await getActiveProfileContext({ ownerUserId: user.id, workspaceName: "My workspace" });
+  const campaigns = await listCampaigns(getDatabase(), { ownerUserId: user.id, profileId: profileContext.activeProfile.id });
   const activeCount = campaigns.filter((campaign) => campaign.status === "active").length;
 
   return (
@@ -29,7 +31,7 @@ export default async function CampaignsPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-sky-700">Opportunity qualification</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">Campaigns</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            Define transparent rules first, then use AI only on jobs that pass them.
+            Manage campaigns and AI suitability for <span className="font-semibold text-teal-700">{profileContext.activeProfile.name}</span>.
           </p>
         </div>
         <Link className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500 focus-visible:ring-offset-2" href="/app/campaigns/new">
